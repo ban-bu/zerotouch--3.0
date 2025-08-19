@@ -1,0 +1,75 @@
+# Railway专用Dockerfile - 针对Railway平台优化的轻量版本
+# 多阶段构建，确保最小镜像体积
+
+# 构建阶段
+FROM node:18-alpine AS builder
+
+# 设置工作目录
+WORKDIR /app
+
+# 安装构建依赖
+RUN apk add --no-cache libc6-compat
+
+# 复制依赖文件
+COPY package*.json ./
+
+# 清理npm缓存并安装依赖
+RUN npm ci --silent
+
+# 复制源代码
+COPY . .
+
+# 构建应用
+RUN npm run build
+
+# 生产运行阶段
+FROM nginx:alpine AS production
+
+# 安装必要的工具（Railway健康检查需要）
+RUN apk add --no-cache curl
+
+# 创建自定义nginx配置（适配Railway环境）
+RUN echo 'server {' > /etc/nginx/conf.d/default.conf && \
+    echo '    listen 8080;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    server_name _;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    root /usr/share/nginx/html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    index index.html index.htm;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    # 支持SPA路由' >> /etc/nginx/conf.d/default.conf && \
+    echo '    location / {' >> /etc/nginx/conf.d/default.conf && \
+    echo '        try_files $uri $uri/ /index.html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    }' >> /etc/nginx/conf.d/default.conf && \
+    echo '    # 静态资源缓存优化' >> /etc/nginx/conf.d/default.conf && \
+    echo '    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {' >> /etc/nginx/conf.d/default.conf && \
+    echo '        expires 1y;' >> /etc/nginx/conf.d/default.conf && \
+    echo '        add_header Cache-Control "public, immutable";' >> /etc/nginx/conf.d/default.conf && \
+    echo '    }' >> /etc/nginx/conf.d/default.conf && \
+    echo '    # Gzip压缩' >> /etc/nginx/conf.d/default.conf && \
+    echo '    gzip on;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;' >> /etc/nginx/conf.d/default.conf && \
+    echo '}' >> /etc/nginx/conf.d/default.conf
+
+# 从构建阶段复制构建产物
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# 设置正确的权限
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /etc/nginx/conf.d
+
+# 创建pid文件目录并设置权限
+RUN mkdir -p /var/run/nginx && \
+    chown -R nginx:nginx /var/run/nginx
+
+# 修改nginx配置以使用端口8080（Railway要求）
+RUN sed -i 's/80/8080/g' /etc/nginx/nginx.conf
+
+# 暴露Railway要求的端口
+EXPOSE 8080
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8080/ || exit 1
+
+# 启动命令
+CMD ["nginx", "-g", "daemon off;"]

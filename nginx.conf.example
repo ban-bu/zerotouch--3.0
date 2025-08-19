@@ -1,0 +1,56 @@
+# ZeroTouch Nginx配置示例
+# 将此文件复制到/etc/nginx/sites-available/并创建软链接到/etc/nginx/sites-enabled/
+
+server {
+    listen 8080;
+    server_name _;
+
+    # 启用gzip压缩
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+    gzip_min_length 1000;
+    gzip_comp_level 6;
+
+    # 安全相关头部
+    add_header X-Content-Type-Options nosniff;
+    add_header X-Frame-Options SAMEORIGIN;
+    add_header X-XSS-Protection "1; mode=block";
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;";
+
+    # 静态文件缓存设置
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+        root /usr/share/nginx/html;
+        expires 30d;
+        add_header Cache-Control "public, no-transform";
+    }
+
+    # 主应用路径
+    location / {
+        root /usr/share/nginx/html;
+        try_files $uri $uri/ /index.html;
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+    }
+
+    # 日志配置
+    access_log /var/log/nginx/zerotouch.access.log;
+    error_log /var/log/nginx/zerotouch.error.log;
+}
+
+# HTTPS配置（取消注释并配置SSL证书后使用）
+# server {
+#     listen 443 ssl http2;
+#     server_name zerotouch.example.com;
+#
+#     ssl_certificate /etc/letsencrypt/live/zerotouch.example.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/zerotouch.example.com/privkey.pem;
+#     ssl_protocols TLSv1.2 TLSv1.3;
+#     ssl_prefer_server_ciphers on;
+#     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+#
+#     # HSTS设置
+#     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+#
+#     # 其他配置与HTTP服务器相同
+#     root /var/www/zerotouch/dist;
+#     # ...
+# }

@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenAI ZeroTouch Services - 零摩擦沟通系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 50%, #f3e8ff 100%);
+            min-height: 100vh;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+
+        /* 深色模式 */
+        body.dark {
+            background: linear-gradient(135deg, #1f2937 0%, #1e40af 50%, #4338ca 100%);
+            color: #f9fafb;
+        }
+
+        /* 玻璃效果 */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark .glass-effect {
+            background: rgba(31, 41, 55, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        body.dark .header-title {
+            color: #f9fafb;
+        }
+
+        .header-subtitle {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        body.dark .header-subtitle {
+            color: #d1d5db;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* 场景选择器 */
+        .scenario-selector {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.25rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 0.5rem;
+        }
+
+        body.dark .scenario-selector {
+            background: rgba(31, 41, 55, 0.5);
+        }
+
+        .scenario-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            background: transparent;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .scenario-btn.active {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .scenario-btn:hover:not(.active) {
+            background: rgba(107, 114, 128, 0.1);
+        }
+
+        /* 连接状态 */
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+        }
+
+        .status-dot.connected {
+            background: #10b981;
+        }
+
+        /* 设置按钮 */
+        .settings-btn {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 0.375rem;
+            background: rgba(107, 114, 128, 0.1);
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .settings-btn:hover {
+            background: rgba(107, 114, 128, 0.2);
+            color: #374151;
+        }
+
+        /* 主要内容 */
+        .main-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* 场景信息 */
+        .scenario-info {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .scenario-info-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .scenario-icon {
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .scenario-details h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .scenario-details p {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        body.dark .scenario-details p {
+            color: #d1d5db;
+        }
+
+        /* 三面板布局 */
+        .panels-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .panels-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        body.dark .panel {
+            background: rgba(31, 41, 55, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-header {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+            background: rgba(249, 250, 251, 0.5);
+        }
+
+        body.dark .panel-header {
+            background: rgba(17, 24, 39, 0.5);
+            border-bottom: 1px solid rgba(75, 85, 99, 0.5);
+        }
+
+        .panel-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel-subtitle {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        body.dark .panel-subtitle {
+            color: #d1d5db;
+        }
+
+        /* 消息区域 */
+        .messages-container {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .message {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            color: #1e40af;
+            margin-left: auto;
+            margin-right: 0;
+            max-width: 80%;
+        }
+
+        .message.ai {
+            background: rgba(229, 231, 235, 0.5);
+            color: #374151;
+            margin-right: auto;
+            margin-left: 0;
+            max-width: 80%;
+        }
+
+        body.dark .message.ai {
+            background: rgba(75, 85, 99, 0.5);
+            color: #d1d5db;
+        }
+
+        .message.llm-request {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+
+        .message.processing {
+            background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+            color: #3730a3;
+            border: 1px solid #6366f1;
+        }
+
+        .message.suggestion {
+            background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+            color: #7c3aed;
+            border: 1px solid #a855f7;
+        }
+
+        .message.followup {
+            background: linear-gradient(135deg, #fff7ed, #fed7aa);
+            color: #ea580c;
+            border: 1px solid #f97316;
+        }
+
+        .message-meta {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+
+        /* 处理步骤 */
+        .processing-steps {
+            margin-top: 0.5rem;
+        }
+
+        .processing-step {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 0.25rem;
+        }
+
+        .processing-step-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .processing-step-content {
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* 输入区域 */
+        .input-container {
+            padding: 1rem;
+            border-top: 1px solid rgba(229, 231, 235, 0.5);
+            background: rgba(249, 250, 251, 0.3);
+        }
+
+        body.dark .input-container {
+            background: rgba(17, 24, 39, 0.3);
+            border-top: 1px solid rgba(75, 85, 99, 0.5);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-end;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            resize: vertical;
+            min-height: 2.5rem;
+            max-height: 8rem;
+            font-family: inherit;
+            font-size: 0.875rem;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        body.dark .input-field {
+            background: rgba(31, 41, 55, 0.8);
+            border: 1px solid #4b5563;
+            color: #f9fafb;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .send-btn {
+            padding: 0.75rem 1rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+        .send-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* 清空按钮 */
+        .clear-container {
+            text-align: center;
+        }
+
+        .clear-btn {
+            padding: 0.5rem 1.5rem;
+            background: rgba(229, 231, 235, 0.8);
+            color: #374151;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .clear-btn:hover {
+            background: rgba(209, 213, 219, 0.8);
+        }
+
+        /* LLM 处理状态 */
+        .llm-processing {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .spinner {
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 通知系统 */
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #10b981;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            border-left-color: #ef4444;
+        }
+
+        .notification.info {
+            border-left-color: #3b82f6;
+        }
+
+        /* 设置面板 */
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: -4px 0 6px -1px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 200;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        body.dark .settings-panel {
+            background: rgba(31, 41, 55, 0.95);
+        }
+
+        .settings-panel.open {
+            transform: translateX(0);
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .settings-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .settings-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .settings-select,
+        .settings-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            background: white;
+        }
+
+        body.dark .settings-select,
+        body.dark .settings-input {
+            background: #374151;
+            border-color: #4b5563;
+            color: #f9fafb;
+        }
+
+        .settings-checkbox {
+            margin-right: 0.5rem;
+        }
+
+        /* 动画 */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-in-left {
+            animation: slideInLeft 0.5s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .slide-in-right {
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .scale-in {
+            animation: scaleIn 0.4s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .scenario-selector {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .panels-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .panel {
+                height: 400px;
+            }
+
+            .settings-panel {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header glass-effect">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="header-title">GenAI ZeroTouch Services</h1>
+                <span class="header-subtitle">零摩擦沟通系统</span>
+            </div>
+            
+            <div class="header-right">
+                <!-- 场景选择器 -->
+                <div class="scenario-selector glass-effect">
+                    <button class="scenario-btn active" data-scenario="retail">
+                        <i class="fas fa-shopping-bag"></i>
+                        零售场景
+                    </button>
+                    <button class="scenario-btn" data-scenario="enterprise">
+                        <i class="fas fa-users"></i>
+                        企业场景
+                    </button>
+                    <button class="scenario-btn" data-scenario="education">
+                        <i class="fas fa-graduation-cap"></i>
+                        教育场景
+                    </button>
+                </div>
+                
+                <!-- 连接状态 -->
+                <div class="connection-status">
+                    <div class="status-dot connected" id="statusDot"></div>
+                    <span id="statusText">已连接</span>
+                </div>
+                
+                <!-- 设置按钮 -->
+                <button class="settings-btn" id="settingsBtn" title="设置 (Ctrl+,)">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="main-content">
+        <!-- 场景信息 -->
+        <div class="scenario-info glass-effect fade-in">
+            <div class="scenario-info-content">
+                <div class="scenario-icon">
+                    <i class="fas fa-shopping-bag" id="scenarioIcon"></i>
+                </div>
+                <div class="scenario-details">
+                    <h2 id="scenarioName">零售场景</h2>
+                    <p id="scenarioDescription">顾客与企业门店的沟通</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 三面板布局 -->
+        <div class="panels-container">
+            <!-- 问题面板 -->
+            <div class="panel slide-in-left">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-user"></i>
+                        <span id="problemRole">顾客/消费者</span>
+                    </div>
+                    <div class="panel-subtitle">提出需求和问题</div>
+                </div>
+                
+                <div class="messages-container" id="problemMessages">
+                    <div class="message ai">
+                        <div>请描述您的需求，我们将为您提供专业的建议和解决方案。</div>
+                        <div class="message-meta">系统提示</div>
+                    </div>
+                </div>
+                
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <textarea 
+                            class="input-field" 
+                            id="problemInput" 
+                            placeholder="请输入您的需求..."
+                            rows="2"
+                        ></textarea>
+                        <button class="send-btn" id="problemSendBtn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LLM处理面板 -->
+            <div class="panel scale-in">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-brain"></i>
+                        AI 处理中心
+                    </div>
+                    <div class="panel-subtitle">智能分析与转换</div>
+                </div>
+                
+                <div class="messages-container" id="llmMessages">
+                    <div class="message processing">
+                        <div>AI 处理中心已就绪，等待输入...</div>
+                        <div class="message-meta">系统状态</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 方案面板 -->
+            <div class="panel slide-in-right">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-lightbulb"></i>
+                        <span id="solutionRole">企业门店/销售代表</span>
+                    </div>
+                    <div class="panel-subtitle">提供解决方案</div>
+                </div>
+                
+                <!-- 迭代模式提示 -->
+                <div id="iterationModeTip" class="p-3 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800" style="display: none;">
+                    <div class="flex items-center space-x-2 text-blue-800 dark:text-blue-200">
+                        <i class="fas fa-lightbulb"></i>
+                        <span class="text-sm font-medium">迭代模式 - 请确认最终回复内容</span>
+                    </div>
+                    <p class="text-xs text-blue-600 dark:text-blue-300 mt-1">
+                        您可以继续编辑内容，确认无误后点击"确认发送"将回复发送给客户
+                    </p>
+                </div>
+                
+                <div class="messages-container" id="solutionMessages">
+                    <div class="message ai">
+                        <div>我是专业的顾问，准备为您提供最佳的解决方案。</div>
+                        <div class="message-meta">系统提示</div>
+                    </div>
+                </div>
+                
+                <!-- 迭代模式下的操作按钮 -->
+                <div id="iterationModeControls" class="p-4 border-t border-gray-200 dark:border-gray-700 bg-yellow-50 dark:bg-yellow-900/20" style="display: none;">
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-2 text-yellow-800 dark:text-yellow-200">
+                            <i class="fas fa-lightbulb"></i>
+                            <span class="text-sm font-medium">编辑最终回复内容</span>
+                        </div>
+                        
+                        <textarea
+                            id="finalResponseInput"
+                            placeholder="编辑最终回复内容..."
+                            class="input-field resize-none transition-all duration-200 focus:shadow-md"
+                            rows="4"
+                        ></textarea>
+                        
+                        <div class="flex space-x-2">
+                            <button
+                                id="confirmSendBtn"
+                                class="flex-1 btn-primary p-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transition-all duration-200 hover:scale-105 flex items-center justify-center space-x-2"
+                                title="确认发送给客户"
+                            >
+                                <i class="fas fa-check-circle"></i>
+                                <span>确认发送</span>
+                            </button>
+                            
+                            <button
+                                id="cancelIterationBtn"
+                                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                                title="取消迭代"
+                            >
+                                <i class="fas fa-times-circle"></i>
+                                <span>取消</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 常规输入区域 -->
+                <div id="regularInputContainer" class="input-container">
+                    <div class="input-wrapper">
+                        <textarea 
+                            class="input-field" 
+                            id="solutionInput" 
+                            placeholder="请输入您的回复..."
+                            rows="2"
+                        ></textarea>
+                        <button class="send-btn" id="solutionSendBtn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- 新增：AI辅助按钮 -->
+                    <div class="flex space-x-2 mt-3">
+                        <button
+                            id="generateSuggestionBtn"
+                            class="flex-1 px-3 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                            title="AI生成建议"
+                        >
+                            <i class="fas fa-lightbulb"></i>
+                            <span>生成相应建议</span>
+                        </button>
+                        
+                        <button
+                            id="generateFollowUpBtn"
+                            class="flex-1 px-3 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                            title="AI生成追问"
+                        >
+                            <i class="fas fa-comment-dots"></i>
+                            <span>生成相应追问</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 清空按钮 -->
+        <div class="clear-container">
+            <button class="clear-btn" id="clearBtn">
+                <i class="fas fa-trash-alt"></i>
+                清空对话
+            </button>
+        </div>
+    </main>
+
+    <!-- 设置面板 -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+            <h3 class="settings-title">设置</h3>
+            <button class="close-btn" id="closeSettingsBtn">&times;</button>
+        </div>
+        
+        <div class="settings-group">
+            <label class="settings-label">
+                <input type="checkbox" class="settings-checkbox" id="darkModeToggle">
+                深色模式
+            </label>
+        </div>
+        
+        <div class="settings-group">
+            <label class="settings-label" for="fontSizeSelect">字体大小</label>
+            <select class="settings-select" id="fontSizeSelect">
+                <option value="small">小</option>
+                <option value="medium" selected>中</option>
+                <option value="large">大</option>
+            </select>
+        </div>
+        
+        <div class="settings-group">
+            <label class="settings-label">
+                <input type="checkbox" class="settings-checkbox" id="soundToggle" checked>
+                提示音效
+            </label>
+        </div>
+        
+        <div class="settings-group">
+            <label class="settings-label">
+                <input type="checkbox" class="settings-checkbox" id="autoScrollToggle" checked>
+                自动滚动
+            </label>
+        </div>
+        
+        <div class="settings-group">
+            <label class="settings-label" for="apiEndpoint">API 端点</label>
+            <input type="text" class="settings-input" id="apiEndpoint" 
+                   value="https://api-inference.modelscope.cn/v1">
+        </div>
+    </div>
+
+    <!-- 通知容器 -->
+    <div id="notificationContainer"></div>
+
+    <script>
+        // 应用状态
+        const APP_STATE = {
+            currentScenario: 'retail',
+            isConnected: true,
+            llmProcessing: false,
+            iterationProcessing: false, // 新增：迭代处理状态
+            iterationMode: false, // 新增：迭代模式状态
+            pendingResponse: null, // 新增：待发送的响应
+            settings: {
+                darkMode: false,
+                fontSize: 'medium',
+                soundEnabled: true,
+                autoScroll: true,
+                apiEndpoint: 'https://api-inference.modelscope.cn/v1'
+            },
+            messages: {
+                problem: [],
+                llm: [],
+                solution: []
+            }
+        };
+
+        // 场景配置
+        const SCENARIOS = {
+            retail: {
+                id: 'retail',
+                name: '零售场景',
+                icon: 'fas fa-shopping-bag',
+                description: '顾客与企业门店的沟通',
+                problemRole: '顾客/消费者',
+                solutionRole: '企业门店/销售代表',
+                example: '我下周要去参加AOM国际会议做主旨演讲，需要一套正式但现代的商务西装，预算在800-1500元之间，身高175cm，希望能显得专业又有活力。'
+            },
+            enterprise: {
+                id: 'enterprise',
+                name: '企业场景',
+                icon: 'fas fa-users',
+                description: '企业跨部门沟通',
+                problemRole: '市场部经理',
+                solutionRole: '研发部技术人员',
+                example: '我们的移动APP用户留存率只有30%，需要在3个月内开发个性化推荐功能来提升至45%，目标用户是18-35岁，预算50万元。'
+            },
+            education: {
+                id: 'education',
+                name: '教育场景',
+                icon: 'fas fa-graduation-cap',
+                description: '学生与教师的互动',
+                problemRole: '学生',
+                solutionRole: '教师',
+                example: '我在学习量子物理时，对波粒二象性概念理解困难，特别是为什么光既是波又是粒子，希望通过具体实验例子来理解这个概念。'
+            }
+        };
+
+        // LLM API 配置
+        const MODELSCOPE_CONFIG = {
+            baseURL: 'https://api-inference.modelscope.cn/v1',
+            model: 'Qwen/Qwen2.5-7B-Instruct',
+            apiKey: 'ms-150d583e-ed00-46d3-ab35-570f03555599'
+        };
+
+        // 工具函数
+        function showNotification(message, type = 'success', duration = 3000) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            container.appendChild(notification);
+            
+            // 显示通知
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // 自动隐藏
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => container.removeChild(notification), 300);
+            }, duration);
+        }
+
+        function formatTime(timestamp) {
+            return new Date(timestamp).toLocaleTimeString('zh-CN', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+
+        function scrollToBottom(container) {
+            if (APP_STATE.settings.autoScroll) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+        // LLM API 调用
+        async function callModelScopeAPI(messages, temperature = 0.7) {
+            try {
+                const response = await fetch(`${APP_STATE.settings.apiEndpoint}/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${MODELSCOPE_CONFIG.apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: MODELSCOPE_CONFIG.model,
+                        messages: messages,
+                        temperature: temperature,
+                        max_tokens: 2000,
+                        stream: false
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API调用失败: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                return data.choices[0].message.content;
+            } catch (error) {
+                console.error('魔搭API调用错误:', error);
+                throw error;
+            }
+        }
+
+        // 双向提示词配置 - 统一管理
+        const PROMPT_CONFIGS = {
+            // 方向1：问题端 → 方案端
+            problemToSolution: {
+                retail: {
+                    systemRole: '你是专业的零售需求分析专家，你的回答是给门店直接看的，负责将顾客需求转化为门店可执行的专业要求。',
+                    context: '【场景界限】仅限零售顾客-门店沟通，严禁输出企业内部流程/跨部门协作/技术研发等非零售内容。\n【转换目标】将顾客的日常表达转化为门店人员能够理解的专业需求描述。\n【输出格式】必须以第三人称描述顾客需求，不要生成、复制门店人员的问候语或回复。\n【必含要素】产品类型、使用场景、预算范围、尺寸规格、服务需求、时间要求。\n【特殊输入处理】当遇到情绪化、不当或不清晰的表达时，需要以专业方式解读潜在需求，避免直接重复原始表达，转化为建设性的服务导向描述。',
+                    example: '转换示例：\n输入："我需要一件适合商务场合的衣服"\n输出："顾客寻找商务正装，适用于重要会议场合，预算待确认，身材信息待确认，希望获得专业搭配指导和尺码建议。"\n\n异常输入处理示例：\n输入：情绪化或不当表达\n输出："顾客情绪较为激动，可能对之前的服务体验存在不满，建议门店优先进行情绪安抚和问题了解，提供耐心专业的服务支持，帮助顾客明确实际购物需求。"'
+                },
+                enterprise: {
+                    systemRole: '你是专业的企业沟通分析专家，你的回答是给研发部直接看的，负责将市场部需求转化为研发部可理解的技术要求。',
+                    context: '【场景界限】仅限企业内部跨部门沟通，严禁输出零售销售/商品购买等非企业内容。\n【转换目标】将业务需求转化为技术实现要求，消除部门间沟通障碍。\n【输出格式】必须以第三人称描述市场部需求，不要生成、复制研发部的回复或提问。\n【必含要素】功能目标、技术需求、时间期限、资源投入、成功指标、风险评估。',
+                    example: '转换示例：\n输入："我们需要提升用户体验"\n输出："市场部要求开发用户体验优化方案，目标提升用户留存率15%，涉及UI/UX重设计、前端性能优化、用户行为分析，预期3个月完成，需要前端开发团队配合。"'
+                },
+                education: {
+                    systemRole: '你是专业的教育沟通分析专家，你的回答是给教师直接看的，负责将学生问题转化为教师可回应的教学需求。',
+                    context: '【场景界限】仅限师生互动学习沟通，严禁输出企业/零售等非教育内容。\n【转换目标】将学生的困惑转化为明确的学习需求和教学要点。\n【输出格式】必须以第三人称描述学生需求，不要生成、复制教师的回复或提问。\n【必含要素】知识点定位、理解困难、学习目标、适用教学方式、能力水平。',
+                    example: '转换示例：\n输入："我不懂这个概念"\n输出："学生对量子物理波粒二象性概念存在理解困难，需要通过具体实验案例和图解说明来建立直观认知，目标是掌握基本原理和典型应用场景。"'
+                }
+            },
+            
+            // 方向2：方案端 → 问题端  
+            solutionToProblem: {
+                retail: {
+                    systemRole: '你是专业的零售方案优化专家，你的回答是给顾客直接看的，负责将门店专业回复转化为顾客友好易懂的语言。',
+                    context: '【转换目标】将门店的专业术语和详细信息转化为顾客友好的表达方式。\n【输出格式】直接转化内容，避免过度客套和模板化用语。\n【优化原则】简化专业术语、突出顾客关心的要点、提供具体行动建议。\n【必含要素】产品特点、价格信息、购买建议、服务承诺、使用指导。',
+                    example: '转换示例：\n输入："该款商务套装采用高支棉面料，版型修身，提供专业量体服务"\n输出："这套西装用的是优质棉料，剪裁合身显身材，我们提供专业量体服务确保完美合身，售价1200元，包含免费修改，非常适合您的商务会议需求。"'
+                },
+                enterprise: {
+                    systemRole: '你是专业的企业方案优化专家，你的回答是给市场部门直接看的，负责将研发部技术回复转化为市场部可理解的业务语言。',
+                    context: '【转换目标】你是把技术专家的话转给市场部，但是要经过修饰，将技术实现细节转化为业务价值和市场效果的表达。\n【输出格式】直接转化内容，禁止使用"非常抱歉/请提供更多信息/能否"等模板化表达。\n【优化原则】突出业务价值、量化预期效果、明确时间和资源。\n【必含要素】业务价值、实施计划、预期效果、所需资源、风险提示。',
+                    example: '转换示例：\n输入："我们将优化API响应时间和数据库查询效率"\n输出："我们计划通过系统性能优化，在2个月内将用户操作响应速度提升50%，预期能显著改善用户体验，需要3名开发人员投入，预算约30万元。"'
+                },
+                education: {
+                    systemRole: '你是专业的教育语言优化专家，你的回答是给学生直接看的，你是要把老师说的话转给学生，但是要经过修饰，负责将教师专业回复转化为学生易懂易记的语言。',
+                    context: '【转换目标】你是要把老师说的话转给学生，但是要经过修饰将学术专业表达转化为学生容易理解和记忆的生动语言。\n【输出格式】专注于知识内容转化，禁止教育学生如何表达或沟通方式。\n【优化原则】使用类比和实例、避免过度专业术语、提供记忆要点。\n【必含要素】概念解释、生动实例、记忆要点、练习建议、拓展思考。',
+                    example: '转换示例：\n输入："量子力学中波粒二象性是指微观粒子既具有波动性又具有粒子性"\n输出："波粒二象性简单说就是光既像波浪又像小球。比如光的干涉现象体现了波的特性，而光电效应体现了粒子特性。建议你做一下双缝实验来直观理解这个概念。"'
+                }
+            }
+        };
+
+        // 处理问题端输入（问题端 → 方案端）
+        async function processProblemInput(content, scenario) {
+            const promptConfig = PROMPT_CONFIGS.problemToSolution[scenario];
+            
+            if (!promptConfig) {
+                throw new Error(`无效的场景类型: ${scenario}`);
+            }
+
+            const comprehensivePrompt = [
+                {
+                    role: 'system',
+                    content: `${promptConfig.systemRole}\n\n${promptConfig.context}\n\n${promptConfig.example}\n\n【执行规则】\n1. 严格基于用户提供的信息进行转换，禁止编造任何未出现的具体数据。\n2. 避免使用"非常抱歉/无法理解/请提供更多信息"等模板化表达。\n3. 【重要】输出必须是第三人称的需求描述，不要生成问候语、提问或回复语句。\n4. 【禁止格式】不要输出"您好"、"请问"、"可以"等直接对话语句。\n5. 信息不足时，在需求描述中注明"待确认"，不要生成提问。\n6. 优先保证需求描述的完整性和专业性。\n7. 【不当输入处理】遇到粗鲁、不当或情绪化表达时，严禁直接复述原话，必须转化为专业的服务导向描述，重点分析客户可能的实际需求和服务改进方向。\n8. 【情绪转化原则】将负面情绪转化为服务机会，将不清晰表达转化为具体的服务指导建议。`
+                },
+                {
+                    role: 'user',
+                    content: `【${scenario === 'retail' ? '顾客' : scenario === 'enterprise' ? '市场部' : '学生'}输入】"${content}"\n\n请将上述输入转换为向${scenario === 'retail' ? '门店人员' : scenario === 'enterprise' ? '研发团队' : '教师'}传达的专业需求描述。你需要以第三人称的角度描述${scenario === 'retail' ? '顾客' : scenario === 'enterprise' ? '市场部' : '学生'}的需求，而不是直接回复${scenario === 'retail' ? '顾客' : scenario === 'enterprise' ? '市场部' : '学生'}。输出应该是告诉${scenario === 'retail' ? '门店人员' : scenario === 'enterprise' ? '研发团队' : '教师'}这个${scenario === 'retail' ? '顾客' : scenario === 'enterprise' ? '需求方' : '学生'}想要什么。`
+                }
+            ];
+
+            const result = await callModelScopeAPI(comprehensivePrompt, 0.1);
+            return {
+                steps: [{ name: `${scenario === 'retail' ? '顾客需求' : scenario === 'enterprise' ? '业务需求' : '学习需求'}转换`, content: result }],
+                translatedMessage: result
+            };
+        }
+
+        // 处理方案端响应（方案端 → 问题端）
+        async function processSolutionResponse(content, scenario) {
+            const promptConfig = PROMPT_CONFIGS.solutionToProblem[scenario];
+            
+            if (!promptConfig) {
+                throw new Error(`无效的场景类型: ${scenario}`);
+            }
+
+            const comprehensivePrompt = [
+                {
+                    role: 'system',
+                    content: `${promptConfig.systemRole}\n\n${promptConfig.context}\n\n${promptConfig.example}\n\n【执行规则】\n1. 严格基于方案端提供的信息进行转换，禁止编造未出现的具体数据。\n2. 【严格禁止】使用"非常抱歉/请提供更多信息/能否/哎呀/不太礼貌"等任何模板化表达。\n3. 【专注转化】只转化专业内容本身，不要教育对方如何沟通或表达。\n4. 【直接输出】直接给出转化结果，不要生成道歉、要求、建议等元对话。\n5. 信息不足时，基于已有信息给出最佳转化结果，不要请求补充。\n6. 优先保证内容的准确性和实用性。`
+                },
+                {
+                    role: 'user',
+                    content: `【${scenario === 'retail' ? '门店人员' : scenario === 'enterprise' ? '研发团队' : '教师'}回复】"${content}"\n\n请将上述专业回复转换为${scenario === 'retail' ? '顾客' : scenario === 'enterprise' ? '市场部' : '学生'}容易理解的表达。专注于内容转化，使用简洁明了的语言，避免任何道歉、客套或要求补充信息的表达。直接给出转化后的核心内容。`
+                }
+            ];
+
+            const result = await callModelScopeAPI(comprehensivePrompt, 0.1);
+            return {
+                steps: [{ name: `${scenario === 'retail' ? '方案优化' : scenario === 'enterprise' ? '技术转业务' : '知识简化'}`, content: result }],
+                optimizedMessage: result
+            };
+        }
+
+        // 新增：生成企业端建议
+        async function generateEnterpriseSuggestion(content, scenario) {
+            const scenarioPrompts = {
+                retail: {
+                    systemRole: '你是一位专业的零售顾问，专门为企业门店提供销售建议和解决方案。',
+                    context: '基于客户的需求和企业的情况，提供专业的销售建议，包括产品推荐、价格策略、服务方案等。',
+                    example: '客户需求："需要商务西装，预算800-1500元"\n建议："建议推荐三款产品：1)经典款A123，售价1280元，意大利面料，免费修改；2)现代款B456，售价1150元，舒适透气；3)高端款C789，售价1350元，时尚剪裁。重点推荐A123，性价比最高，适合商务场合。"'
+                },
+                enterprise: {
+                    systemRole: '你是一位专业的企业技术顾问，专门为技术团队提供解决方案建议。',
+                    context: '基于业务需求和技术现状，提供技术方案建议，包括架构设计、技术选型、实施计划等。',
+                    example: '业务需求："提升用户体验，3个月内完成"\n建议："建议采用渐进式优化方案：第一阶段(1个月)优化现有界面，第二阶段(1.5个月)重构核心流程，第三阶段(0.5个月)性能优化。预计投入3名开发人员，总成本30万元。"'
+                },
+                education: {
+                    systemRole: '你是一位专业的教育顾问，专门为教师提供教学方案建议。',
+                    context: '基于学生的学习需求和教学现状，提供教学建议，包括教学方法、课程安排、学习指导等。',
+                    example: '学生需求："理解量子物理波粒二象性"\n建议："建议采用三步教学法：1)通过双缝实验视频建立直观认知；2)用光电效应实验理解粒子性；3)通过计算题巩固理解。预计需要4课时，建议准备实验材料。"'
+                }
+            };
+
+            if (!scenario || !scenarioPrompts[scenario]) {
+                throw new Error(`无效的场景类型: ${scenario}`);
+            }
+            const prompt = scenarioPrompts[scenario];
+            
+            const comprehensivePrompt = [
+                {
+                    role: 'system',
+                    content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n生成建议的指导原则：\n1. 基于当前对话内容，提供具体可行的建议\n2. 考虑企业能力和资源限制\n3. 提供多个选项供企业选择\n4. 包含具体的实施步骤和预期效果\n5. 避免过于理论化的建议，注重实用性`
+                },
+                {
+                    role: 'user',
+                    content: `当前对话内容："${content}"\n\n请为企业提供专业的建议，包括：\n\n【核心建议】\n基于当前情况的主要建议\n\n【具体方案】\n提供2-3个具体的实施方案\n\n【实施要点】\n关键的实施步骤和注意事项`
+                }
+            ];
+            
+            const result = await callModelScopeAPI(comprehensivePrompt, 0.3);
+            return {
+                steps: [{ name: '核心建议', content: result }],
+                suggestionMessage: result
+            };
+        }
+
+        // 新增：生成企业端追问
+        async function generateEnterpriseFollowUp(content, scenario) {
+            const scenarioPrompts = {
+                retail: {
+                    systemRole: '你是一位专业的零售销售专家，专门帮助企业了解客户需求的关键信息。',
+                    context: '基于当前对话，识别需要进一步了解的关键信息，生成有针对性的追问。',
+                    example: '客户说："需要商务西装"\n追问："请问您的具体使用场合是什么？预算范围大概是多少？您的身高体重是多少？对颜色和款式有什么偏好吗？"'
+                },
+                enterprise: {
+                    systemRole: '你是一位专业的企业需求分析师，专门帮助技术团队深入了解业务需求。',
+                    context: '基于当前对话，识别技术实现需要的关键信息，生成有针对性的追问。',
+                    example: '业务方说："需要提升用户体验"\n追问："具体希望提升哪些方面的体验？目标用户群体是谁？当前的痛点是什么？有具体的时间要求吗？预算范围是多少？"'
+                },
+                education: {
+                    systemRole: '你是一位专业的教育需求分析师，专门帮助教师了解学生的学习情况。',
+                    context: '基于当前对话，识别教学需要的关键信息，生成有针对性的追问。',
+                    example: '学生说："不懂这个概念"\n追问："您之前学过相关的基础知识吗？您更倾向于哪种学习方式？您希望达到什么样的理解程度？有什么具体的学习目标吗？"'
+                }
+            };
+
+            if (!scenario || !scenarioPrompts[scenario]) {
+                throw new Error(`无效的场景类型: ${scenario}`);
+            }
+            const prompt = scenarioPrompts[scenario];
+            
+            const comprehensivePrompt = [
+                {
+                    role: 'system',
+                    content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n生成追问的指导原则：\n1. 基于当前对话内容，识别信息缺口\n2. 生成3-5个有针对性的追问\n3. 追问要具体、明确，避免模糊表达\n4. 按照重要性排序\n5. 使用友好的语气，避免过于直接`
+                },
+                {
+                    role: 'user',
+                    content: `当前对话内容："${content}"\n\n请生成有针对性的追问，帮助更好地了解需求：\n\n【关键信息缺口】\n识别当前对话中缺失的关键信息\n\n【追问建议】\n提供3-5个具体的追问问题\n\n【追问策略】\n建议的追问顺序和方式`
+                }
+            ];
+            
+            const result = await callModelScopeAPI(comprehensivePrompt, 0.3);
+            return {
+                steps: [{ name: '追问建议', content: result }],
+                followUpMessage: result
+            };
+        }
+
+        // 消息管理
+        function addMessage(panel, messageData) {
+            APP_STATE.messages[panel].push(messageData);
+            renderMessages(panel);
+        }
+
+        function renderMessages(panel) {
+            const container = document.getElementById(`${panel}Messages`);
+            const messages = APP_STATE.messages[panel];
+            
+            // 保留初始提示消息
+            if (panel === 'problem' && messages.length === 0) {
+                container.innerHTML = `
+                    <div class="message ai">
+                        <div>请描述您的需求，我们将为您提供专业的建议和解决方案。</div>
+                        <div class="message-meta">系统提示</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (panel === 'solution' && messages.length === 0) {
+                container.innerHTML = `
+                    <div class="message ai">
+                        <div>我是专业的顾问，准备为您提供最佳的解决方案。</div>
+                        <div class="message-meta">系统提示</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (panel === 'llm') {
+                container.innerHTML = '';
+                if (messages.length === 0) {
+                    container.innerHTML = `
+                        <div class="message processing">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-brain text-purple-600"></i>
+                                <span>AI 处理中心已就绪，等待输入...</span>
+                            </div>
+                            <div class="message-meta">系统状态</div>
+                        </div>
+                    `;
+                    return;
+                }
+            }
+            
+            container.innerHTML = '';
+            
+            messages.forEach(message => {
+                const messageEl = document.createElement('div');
+                
+                if (message.type === 'processing') {
+                    messageEl.className = 'message processing';
+                    
+                    // 简化的处理状态显示
+                    let processingStatus = '正在处理...';
+                    let processingIcon = '<i class="fas fa-brain text-blue-600"></i>';
+                    
+                    if (message.title.includes('问题端')) {
+                        processingStatus = '正在分析客户需求...';
+                        processingIcon = '<i class="fas fa-layer-group text-blue-600"></i>';
+                    } else if (message.title.includes('方案端')) {
+                        processingStatus = '正在优化企业回复...';
+                        processingIcon = '<i class="fas fa-bolt text-green-600"></i>';
+                    } else if (message.title.includes('建议')) {
+                        processingStatus = '正在生成专业建议...';
+                        processingIcon = '<i class="fas fa-lightbulb text-purple-600"></i>';
+                    } else if (message.title.includes('追问')) {
+                        processingStatus = '正在生成追问问题...';
+                        processingIcon = '<i class="fas fa-filter text-orange-600"></i>';
+                    } else if (message.title.includes('最终')) {
+                        processingStatus = '正在处理最终回复...';
+                        processingIcon = '<i class="fas fa-arrow-right text-indigo-600"></i>';
+                    }
+                    
+                    messageEl.innerHTML = `
+                        <div class="flex items-start space-x-2">
+                            ${processingIcon}
+                            <div class="flex-1">
+                                <div class="font-medium text-secondary-800 mb-1">${processingStatus}</div>
+                                <div class="mt-2">
+                                    <div class="flex items-center space-x-2 text-sm text-secondary-600">
+                                        <div class="flex space-x-1">
+                                            <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                                            <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                            <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                        </div>
+                                        <span>处理完成</span>
+                                    </div>
+                                </div>
+                                <div class="text-xs text-secondary-600 mt-2">${formatTime(message.timestamp)}</div>
+                            </div>
+                        </div>
+                    `;
+                } else if (message.type === 'suggestion') {
+                    messageEl.className = 'message suggestion';
+                    messageEl.innerHTML = `
+                        <div><strong>AI生成的建议</strong></div>
+                        <div>${message.text}</div>
+                        <div class="message-meta">${formatTime(message.timestamp)}</div>
+                    `;
+                } else if (message.type === 'followup') {
+                    messageEl.className = 'message followup';
+                    messageEl.innerHTML = `
+                        <div><strong>AI生成的追问</strong></div>
+                        <div>${message.text}</div>
+                        <div class="message-meta">${formatTime(message.timestamp)}</div>
+                    `;
+                } else {
+                    messageEl.className = `message ${message.type}`;
+                    messageEl.innerHTML = `
+                        <div>${message.text}</div>
+                        <div class="message-meta">${formatTime(message.timestamp)}</div>
+                    `;
+                }
+                
+                container.appendChild(messageEl);
+            });
+            
+            // 添加处理状态显示
+            if (panel === 'solution') {
+                // 显示迭代处理状态
+                if (APP_STATE.iterationProcessing) {
+                    const processingEl = document.createElement('div');
+                    processingEl.className = 'message suggestion';
+                    processingEl.innerHTML = `
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-lightbulb text-purple-600"></i>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                                <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                            <span class="text-sm text-purple-700">AI正在生成...</span>
+                        </div>
+                    `;
+                    container.appendChild(processingEl);
+                }
+                // 显示常规处理状态（只在没有迭代处理时显示）
+                else if (APP_STATE.llmProcessing) {
+                    const processingEl = document.createElement('div');
+                    processingEl.className = 'message processing';
+                    processingEl.innerHTML = `
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-brain text-blue-600"></i>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                                <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                            <span class="text-sm text-blue-700">正在处理...</span>
+                        </div>
+                    `;
+                    container.appendChild(processingEl);
+                }
+            }
+            
+            scrollToBottom(container);
+        }
+
+        function clearAllMessages() {
+            APP_STATE.messages = {
+                problem: [],
+                llm: [],
+                solution: []
+            };
+            APP_STATE.iterationMode = false;
+            APP_STATE.iterationProcessing = false;
+            APP_STATE.pendingResponse = null;
+            
+            renderMessages('problem');
+            renderMessages('llm');
+            renderMessages('solution');
+            
+            showNotification('对话已清空');
+        }
+
+        // 发送消息
+        async function sendProblemMessage(text) {
+            if (!text.trim()) return;
+            
+            const userMessage = {
+                type: 'user',
+                text: text,
+                timestamp: new Date().toISOString()
+            };
+            
+            addMessage('problem', userMessage);
+            
+            // 开始处理
+            APP_STATE.llmProcessing = true;
+            updateProcessingUI();
+            
+            try {
+                const llmResult = await processProblemInput(text, APP_STATE.currentScenario);
+                
+                // 添加处理结果到LLM面板
+                const llmMessage = {
+                    type: 'processing',
+                    title: '处理问题端输入',
+                    steps: llmResult.steps,
+                    output: llmResult.translatedMessage,
+                    timestamp: new Date().toISOString()
+                };
+                addMessage('llm', llmMessage);
+                
+                // 添加翻译后的消息到方案端
+                const translatedMessage = {
+                    type: 'llm-request',
+                    text: llmResult.translatedMessage,
+                    timestamp: new Date().toISOString()
+                };
+                addMessage('solution', translatedMessage);
+                
+                if (APP_STATE.settings.soundEnabled) {
+                    // 播放提示音（这里可以添加音频）
+                }
+                
+            } catch (error) {
+                console.error('处理错误:', error);
+                showNotification('处理过程中出现错误，请稍后重试', 'error');
+                
+                const errorMessage = {
+                    type: 'processing',
+                    title: '处理出错',
+                    steps: [{
+                        name: '错误信息',
+                        content: '抱歉，处理过程中出现了错误，请稍后重试。'
+                    }],
+                    timestamp: new Date().toISOString()
+                };
+                addMessage('llm', errorMessage);
+            } finally {
+                APP_STATE.llmProcessing = false;
+                updateProcessingUI();
+            }
+        }
+
+        async function sendSolutionMessage(text) {
+            if (!text.trim()) return;
+            
+            const userMessage = {
+                type: 'user',
+                text: text,
+                timestamp: new Date().toISOString()
+            };
+            
+            addMessage('solution', userMessage);
+            
+            // 开始处理
+            APP_STATE.llmProcessing = true;
+            updateProcessingUI();
+            
+            try {
+                const llmResult = await processSolutionResponse(text, APP_STATE.currentScenario);
+                
+                // 添加处理结果到LLM面板
+                const llmMessage = {
+                    type: 'processing',
+                    title: '处理方案端响应',
+                    steps: llmResult.steps,
+                    output: llmResult.optimizedMessage,
+                    timestamp: new Date().toISOString()
+                };
+                addMessage('llm', llmMessage);
+                
+                // 添加优化后的响应到问题端
+                const optimizedMessage = {
+                    type: 'ai_response',
+                    text: llmResult.optimizedMessage,
+                    timestamp: new Date().toISOString()
+                };
+                addMessage('problem', optimizedMessage);
+                
+                if (APP_STATE.settings.soundEnabled) {
+                    // 播放提示音
+                }
+                
+            } catch (error) {
+                console.error('处理错误:', error);
+                showNotification('处理过程中出现错误，请稍后重试', 'error');
+                
+                const errorMessage = {
+                    type: 'processing',
+                    title: '处理出错',
+                    steps: [{
+                        name: '错误信息',
+                        content: '抱歉，处理过程中出现了错误，请稍后重试。'
+                    }],
+                    timestamp: new Date().toISOString()
+                };
+                addMessage('llm', errorMessage);
+            } finally {
+                APP_STATE.llmProcessing = false;
+                updateProcessingUI();
+            }
+        }
+
+        // 新增：生成企业端建议
+        async function generateSuggestion() {
+            if (APP_STATE.iterationProcessing) return;
+
+            APP_STATE.iterationProcessing = true;
+            updateProcessingUI();
+
+            try {
+                // 获取最新的对话内容
+                const recentMessages = [
+                    ...APP_STATE.messages.problem.filter(m => m.type === 'user' || m.type === 'ai_response').slice(-2),
+                    ...APP_STATE.messages.solution.filter(m => m.type === 'user' || m.type === 'ai_response').slice(-2)
+                ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+                const currentContent = recentMessages.map(msg => msg.text).join('\n');
+
+                // 生成建议
+                const llmResult = await generateEnterpriseSuggestion(currentContent, APP_STATE.currentScenario);
+
+                // 添加LLM处理过程到中介面板
+                const llmMessage = {
+                    type: 'processing',
+                    title: '生成企业端建议',
+                    steps: llmResult.steps,
+                    output: llmResult.suggestionMessage,
+                    timestamp: new Date().toISOString()
+                };
+                addMessage('llm', llmMessage);
+
+                // 将建议添加到方案端（作为迭代内容）
+                const suggestionMessage = {
+                    type: 'suggestion',
+                    text: llmResult.suggestionMessage,
+                    timestamp: new Date().toISOString()
+                };
+                addMessage('solution', suggestionMessage);
+
+                // 进入迭代模式
+                APP_STATE.iterationMode = true;
+                APP_STATE.pendingResponse = llmResult.suggestionMessage;
+                updateIterationModeUI();
+
+            } catch (error) {
+                console.error('生成建议错误:', error);
+                const errorMessage = {
+                    type: 'processing',
+                    title: '生成建议出错',
+                    steps: [{
+                        name: '错误信息',
+                        content: '抱歉，生成建议时出现了错误，请稍后重试。'
+                    }],
+                    timestamp: new Date().toISOString()
+                };
+                addMessage('llm', errorMessage);
+            } finally {
+                APP_STATE.iterationProcessing = false;
+                updateProcessingUI();
+            }
+        }
+
+        // 新增：生成企业端追问
+        async function generateFollowUp() {
+            if (APP_STATE.iterationProcessing) return;
+
+            APP_STATE.iterationProcessing = true;
+            updateProcessingUI();
+
+            try {
+                // 获取最新的对话内容
+                const recentMessages = [
+                    ...APP_STATE.messages.problem.filter(m => m.type === 'user' || m.type === 'ai_response').slice(-2),
+                    ...APP_STATE.messages.solution.filter(m => m.type === 'user' || m.type === 'ai_response').slice(-2)
+                ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+                const currentContent = recentMessages.map(msg => msg.text).join('\n');
+
+                // 生成追问
+                const llmResult = await generateEnterpriseFollowUp(currentContent, APP_STATE.currentScenario);
+
+                // 添加LLM处理过程到中介面板
+                const llmMessage = {
+                    type: 'processing',
+                    title: '生成企业端追问',
+                    steps: llmResult.steps,
+                    output: llmResult.followUpMessage,
+                    timestamp: new Date().toISOString()
+                };
+                addMessage('llm', llmMessage);
+
+                // 将追问添加到方案端（作为迭代内容）
+                const followUpMessage = {
+                    type: 'followup',
+                    text: llmResult.followUpMessage,
+                    timestamp: new Date().toISOString()
+                };
+                addMessage('solution', followUpMessage);
+
+                // 进入迭代模式
+                APP_STATE.iterationMode = true;
+                APP_STATE.pendingResponse = llmResult.followUpMessage;
+                updateIterationModeUI();
+
+            } catch (error) {
+                console.error('生成追问错误:', error);
+                const errorMessage = {
+                    type: 'processing',
+                    title: '生成追问出错',
+                    steps: [{
+                        name: '错误信息',
+                        content: '抱歉，生成追问时出现了错误，请稍后重试。'
+                    }],
+                    timestamp: new Date().toISOString()
+                };
+                addMessage('llm', errorMessage);
+            } finally {
+                APP_STATE.iterationProcessing = false;
+                updateProcessingUI();
+            }
+        }
+
+        // 新增：确认发送最终响应
+        async function confirmSendResponse(finalResponse) {
+            if (APP_STATE.llmProcessing) return;
+
+            APP_STATE.llmProcessing = true;
+            updateProcessingUI();
+
+            try {
+                // 处理最终响应
+                const llmResult = await processSolutionResponse(finalResponse, APP_STATE.currentScenario);
+
+                // 添加LLM处理过程到中介面板
+                const llmMessage = {
+                    type: 'processing',
+                    title: '处理最终响应',
+                    steps: llmResult.steps,
+                    output: llmResult.optimizedMessage,
+                    timestamp: new Date().toISOString()
+                };
+                addMessage('llm', llmMessage);
+
+                // 添加优化后的响应到问题端
+                const optimizedMessage = {
+                    type: 'ai_response',
+                    text: llmResult.optimizedMessage,
+                    timestamp: new Date().toISOString()
+                };
+                addMessage('problem', optimizedMessage);
+
+                // 退出迭代模式
+                APP_STATE.iterationMode = false;
+                APP_STATE.pendingResponse = null;
+                updateIterationModeUI();
+
+            } catch (error) {
+                console.error('确认发送错误:', error);
+                const errorMessage = {
+                    type: 'processing',
+                    title: '处理最终响应出错',
+                    steps: [{
+                        name: '错误信息',
+                        content: '抱歉，处理最终响应时出现了错误，请稍后重试。'
+                    }],
+                    timestamp: new Date().toISOString()
+                };
+                addMessage('llm', errorMessage);
+            } finally {
+                APP_STATE.llmProcessing = false;
+                updateProcessingUI();
+            }
+        }
+
+        // 新增：取消迭代模式
+        function cancelIteration() {
+            APP_STATE.iterationMode = false;
+            APP_STATE.iterationProcessing = false;
+            APP_STATE.pendingResponse = null;
+            updateIterationModeUI();
+        }
+
+        function updateProcessingUI() {
+            const problemSendBtn = document.getElementById('problemSendBtn');
+            const solutionSendBtn = document.getElementById('solutionSendBtn');
+            const generateSuggestionBtn = document.getElementById('generateSuggestionBtn');
+            const generateFollowUpBtn = document.getElementById('generateFollowUpBtn');
+            const confirmSendBtn = document.getElementById('confirmSendBtn');
+            const cancelIterationBtn = document.getElementById('cancelIterationBtn');
+            
+            // 问题端和方案端的发送按钮只受llmProcessing影响
+            problemSendBtn.disabled = APP_STATE.llmProcessing;
+            solutionSendBtn.disabled = APP_STATE.llmProcessing;
+            
+            // AI辅助按钮受iterationProcessing影响
+            generateSuggestionBtn.disabled = APP_STATE.iterationProcessing || !APP_STATE.messages.solution || APP_STATE.messages.solution.length === 0;
+            generateFollowUpBtn.disabled = APP_STATE.iterationProcessing || !APP_STATE.messages.solution || APP_STATE.messages.solution.length === 0;
+            
+            // 迭代模式按钮受llmProcessing影响
+            confirmSendBtn.disabled = APP_STATE.llmProcessing;
+            cancelIterationBtn.disabled = APP_STATE.llmProcessing;
+            
+            // 更新AI辅助按钮的显示状态
+            if (APP_STATE.iterationProcessing) {
+                generateSuggestionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
+                generateFollowUpBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
+            } else {
+                generateSuggestionBtn.innerHTML = '<i class="fas fa-lightbulb"></i> 生成相应建议';
+                generateFollowUpBtn.innerHTML = '<i class="fas fa-comment-dots"></i> 生成相应追问';
+            }
+            
+            if (APP_STATE.llmProcessing) {
+                problemSendBtn.innerHTML = '<i class="spinner"></i>';
+                solutionSendBtn.innerHTML = '<i class="spinner"></i>';
+            } else {
+                problemSendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+                solutionSendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            }
+            
+            // 重新渲染方案端消息以显示处理状态
+            renderMessages('solution');
+        }
+
+        // 新增：更新迭代模式UI
+        function updateIterationModeUI() {
+            const iterationModeTip = document.getElementById('iterationModeTip');
+            const iterationModeControls = document.getElementById('iterationModeControls');
+            const regularInputContainer = document.getElementById('regularInputContainer');
+            const finalResponseInput = document.getElementById('finalResponseInput');
+            
+            if (APP_STATE.iterationMode) {
+                iterationModeTip.style.display = 'block';
+                iterationModeControls.style.display = 'block';
+                regularInputContainer.style.display = 'none';
+                
+                if (APP_STATE.pendingResponse) {
+                    finalResponseInput.value = APP_STATE.pendingResponse;
+                }
+            } else {
+                iterationModeTip.style.display = 'none';
+                iterationModeControls.style.display = 'none';
+                regularInputContainer.style.display = 'block';
+                finalResponseInput.value = '';
+            }
+        }
+
+        // 场景切换
+        function changeScenario(scenarioId) {
+            APP_STATE.currentScenario = scenarioId;
+            const scenario = SCENARIOS[scenarioId];
+            
+            // 更新场景信息
+            document.getElementById('scenarioIcon').className = scenario.icon;
+            document.getElementById('scenarioName').textContent = scenario.name;
+            document.getElementById('scenarioDescription').textContent = scenario.description;
+            document.getElementById('problemRole').textContent = scenario.problemRole;
+            document.getElementById('solutionRole').textContent = scenario.solutionRole;
+            
+            // 更新场景按钮状态
+            document.querySelectorAll('.scenario-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.scenario === scenarioId) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // 清空对话
+            clearAllMessages();
+            
+            showNotification(`已切换到${scenario.name}`);
+        }
+
+        // 设置管理
+        function loadSettings() {
+            const saved = localStorage.getItem('app-settings');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    APP_STATE.settings = { ...APP_STATE.settings, ...parsed };
+                } catch (error) {
+                    console.error('加载设置失败:', error);
+                }
+            }
+            
+            applySettings();
+            updateSettingsUI();
+        }
+
+        function saveSettings() {
+            localStorage.setItem('app-settings', JSON.stringify(APP_STATE.settings));
+        }
+
+        function applySettings() {
+            // 深色模式
+            document.body.classList.toggle('dark', APP_STATE.settings.darkMode);
+            
+            // 字体大小
+            const fontSizeClasses = { small: 'text-sm', medium: 'text-base', large: 'text-lg' };
+            Object.values(fontSizeClasses).forEach(cls => {
+                document.documentElement.classList.remove(cls);
+            });
+            document.documentElement.classList.add(fontSizeClasses[APP_STATE.settings.fontSize]);
+        }
+
+        function updateSettingsUI() {
+            document.getElementById('darkModeToggle').checked = APP_STATE.settings.darkMode;
+            document.getElementById('fontSizeSelect').value = APP_STATE.settings.fontSize;
+            document.getElementById('soundToggle').checked = APP_STATE.settings.soundEnabled;
+            document.getElementById('autoScrollToggle').checked = APP_STATE.settings.autoScroll;
+            document.getElementById('apiEndpoint').value = APP_STATE.settings.apiEndpoint;
+        }
+
+        // 事件监听器
+        function setupEventListeners() {
+            // 场景切换
+            document.querySelectorAll('.scenario-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    changeScenario(btn.dataset.scenario);
+                });
+            });
+
+            // 发送消息
+            document.getElementById('problemSendBtn').addEventListener('click', () => {
+                const input = document.getElementById('problemInput');
+                sendProblemMessage(input.value);
+                input.value = '';
+            });
+
+            document.getElementById('solutionSendBtn').addEventListener('click', () => {
+                const input = document.getElementById('solutionInput');
+                sendSolutionMessage(input.value);
+                input.value = '';
+            });
+
+            // 新增：AI辅助按钮
+            document.getElementById('generateSuggestionBtn').addEventListener('click', () => {
+                generateSuggestion();
+            });
+
+            document.getElementById('generateFollowUpBtn').addEventListener('click', () => {
+                generateFollowUp();
+            });
+
+            // 新增：迭代模式按钮
+            document.getElementById('confirmSendBtn').addEventListener('click', () => {
+                const finalResponseInput = document.getElementById('finalResponseInput');
+                confirmSendResponse(finalResponseInput.value);
+            });
+
+            document.getElementById('cancelIterationBtn').addEventListener('click', () => {
+                cancelIteration();
+                updateIterationModeUI();
+            });
+
+            // 回车发送
+            document.getElementById('problemInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById('problemSendBtn').click();
+                }
+            });
+
+            document.getElementById('solutionInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById('solutionSendBtn').click();
+                }
+            });
+
+            // 清空对话
+            document.getElementById('clearBtn').addEventListener('click', clearAllMessages);
+
+            // 设置面板
+            document.getElementById('settingsBtn').addEventListener('click', () => {
+                document.getElementById('settingsPanel').classList.add('open');
+            });
+
+            document.getElementById('closeSettingsBtn').addEventListener('click', () => {
+                document.getElementById('settingsPanel').classList.remove('open');
+            });
+
+            // 设置项
+            document.getElementById('darkModeToggle').addEventListener('change', (e) => {
+                APP_STATE.settings.darkMode = e.target.checked;
+                applySettings();
+                saveSettings();
+            });
+
+            document.getElementById('fontSizeSelect').addEventListener('change', (e) => {
+                APP_STATE.settings.fontSize = e.target.value;
+                applySettings();
+                saveSettings();
+            });
+
+            document.getElementById('soundToggle').addEventListener('change', (e) => {
+                APP_STATE.settings.soundEnabled = e.target.checked;
+                saveSettings();
+            });
+
+            document.getElementById('autoScrollToggle').addEventListener('change', (e) => {
+                APP_STATE.settings.autoScroll = e.target.checked;
+                saveSettings();
+            });
+
+            document.getElementById('apiEndpoint').addEventListener('change', (e) => {
+                APP_STATE.settings.apiEndpoint = e.target.value;
+                saveSettings();
+            });
+
+            // 键盘快捷键
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    switch (e.key) {
+                        case ',':
+                            e.preventDefault();
+                            document.getElementById('settingsBtn').click();
+                            break;
+                        case 'k':
+                            e.preventDefault();
+                            clearAllMessages();
+                            break;
+                    }
+                }
+            });
+
+            // 点击外部关闭设置面板
+            document.addEventListener('click', (e) => {
+                const settingsPanel = document.getElementById('settingsPanel');
+                const settingsBtn = document.getElementById('settingsBtn');
+                
+                if (!settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)) {
+                    settingsPanel.classList.remove('open');
+                }
+            });
+        }
+
+        // 初始化应用
+        function initApp() {
+            loadSettings();
+            setupEventListeners();
+            
+            // 模拟连接状态
+            setTimeout(() => {
+                showNotification('已连接到服务器', 'success');
+            }, 1000);
+            
+            // 初始化消息显示
+            renderMessages('problem');
+            renderMessages('llm');
+            renderMessages('solution');
+            
+            // 初始化UI状态
+            updateProcessingUI();
+            updateIterationModeUI();
+        }
+
+        // 启动应用
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
