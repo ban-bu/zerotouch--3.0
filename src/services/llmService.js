@@ -187,29 +187,67 @@ const buildChatContextWithLogging = (chatHistory, contextType = '聊天历史上
   const recentHistory = chatHistory.slice(-maxMessages)
   recentHistory.forEach((msg, index) => {
     let role = 'AI处理'
+    
+    // 增强的角色映射逻辑，包含错误检测和智能推断
     if (msg.type === 'user') {
-      role = msg.panel === 'problem' ? '客户' : '企业端'
+      if (msg.panel === 'problem') {
+        role = '客户'
+      } else if (msg.panel === 'solution') {
+        role = '企业端'
+      } else {
+        // 如果panel字段缺失或无效，尝试智能推断
+        const content = msg.text?.toLowerCase() || ''
+        if (content.includes('退货') || content.includes('投诉') || content.includes('不满') || 
+            content.includes('cnm') || content.includes('草') || content.includes('妈')) {
+          role = '客户'
+        } else {
+          role = '企业端'
+        }
+      }
     } else if (msg.type === 'ai_response') {
       role = msg.panel === 'problem' ? '系统回复给客户' : '系统回复给企业端'
     } else if (msg.type === 'llm_request') {
       role = 'AI需求转译'
     }
+    
     const preview = msg.text?.substring(0, 100)
     const truncated = msg.text?.length > 100 ? '...' : ''
+    
+    // 详细的调试信息
     console.log(`${index + 1}. [${role}]: ${preview}${truncated}`)
+    console.log(`   🔍 Debug: type="${msg.type}", panel="${msg.panel}", timestamp="${msg.timestamp}"`)
   })
   console.groupEnd()
   
   const chatContext = `\n\n${contextType}：\n` + 
     recentHistory.map((msg, index) => {
       let role = 'AI处理'
+      
+      // 增强的角色映射逻辑，包含错误检测和智能推断
       if (msg.type === 'user') {
-        role = msg.panel === 'problem' ? '客户' : '企业端'
+        if (msg.panel === 'problem') {
+          role = '客户'
+        } else if (msg.panel === 'solution') {
+          role = '企业端'
+        } else {
+          // 如果panel字段缺失或无效，尝试智能推断
+          console.warn(`⚠️ 消息panel字段异常: panel="${msg.panel}", 内容预览: "${msg.text?.substring(0, 50)}..."`)
+          // 根据消息内容的特征进行智能判断
+          const content = msg.text?.toLowerCase() || ''
+          if (content.includes('退货') || content.includes('投诉') || content.includes('不满') || 
+              content.includes('cnm') || content.includes('草') || content.includes('妈')) {
+            role = '客户'
+            console.log(`🔧 智能推断: 根据内容特征判断为客户消息`)
+          } else {
+            role = '企业端'
+          }
+        }
       } else if (msg.type === 'ai_response') {
         role = msg.panel === 'problem' ? '系统回复给客户' : '系统回复给企业端'
       } else if (msg.type === 'llm_request') {
         role = 'AI需求转译'
       }
+      
       return `${index + 1}. ${role}: ${msg.text}`
     }).join('\n')
   
