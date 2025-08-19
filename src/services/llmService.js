@@ -2,12 +2,14 @@
 // Impact: 切换到 Deepbricks API，模型 GPT-4.1-mini
 // Backward Compatibility: 保留原有函数/常量命名与请求结构，调用方无需改动
 
+import { ENV_CONFIG } from '../config/env.js'
+
 // Deepbricks API配置
 const MODELSCOPE_CONFIG = {
-  // [MODIFIED]
-  baseURL: 'https://api.deepbricks.ai/v1/',
-  model: 'GPT-5-Chat',
-  apiKey: 'sk-lNVAREVHjj386FDCd9McOL7k66DZCUkTp6IbV0u9970qqdlg'
+  // [MODIFIED] 使用环境变量配置
+  baseURL: ENV_CONFIG.DEEPBRICKS_API_URL || 'https://api.deepbricks.ai/v1/',
+  model: ENV_CONFIG.DEEPBRICKS_MODEL || 'GPT-5-Chat',
+  apiKey: ENV_CONFIG.DEEPBRICKS_API_KEY || 'sk-lNVAREVHjj386FDCd9McOL7k66DZCUkTp6IbV0u9970qqdlg'
 }
 
 // 日志辅助函数（避免输出过长内容和敏感信息）

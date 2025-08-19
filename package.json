@@ -5,12 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/build-html.js",
+    "build:react": "vite build",
+    "build:html": "node scripts/build-html.js",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "start": "vite preview --port 3000 --host",
     "railway:build": "npm ci && npm run build",
-    "railway:start": "vite preview --port $PORT --host 0.0.0.0"
+    "railway:start": "vite preview --port $PORT --host 0.0.0.0",
+    "deploy:prep": "npm run build && echo '✅ Ready for deployment!'"
   },
   "dependencies": {
     "react": "^18.2.0",

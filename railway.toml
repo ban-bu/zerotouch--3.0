@@ -12,6 +12,20 @@ restartPolicyMaxRetries = 10
 PORT = "8080"
 NODE_ENV = "production"
 
+# LLM API 配置
+VITE_MODELSCOPE_API_URL = "https://api-inference.modelscope.cn/v1"
+VITE_DEEPBRICKS_API_URL = "https://api.deepbricks.ai/v1/"
+VITE_DEEPBRICKS_MODEL = "GPT-5-Chat"
+
+# 应用配置
+VITE_APP_TITLE = "ZeroTouch AI中介服务"
+VITE_APP_VERSION = "2.0.0"
+
+# 功能开关
+VITE_ENABLE_DEBUG = "false"
+VITE_ENABLE_SOUND = "true"
+VITE_ENABLE_AUTO_SCROLL = "true"
+
 # Railway服务配置
 [[services]]
 name = "zerotouch-frontend"
@@ -31,3 +45,17 @@ restartPolicyMaxRetries = 10
 [services.variables]
 PORT = "8080"
 NODE_ENV = "production"
+
+# LLM API 配置
+VITE_MODELSCOPE_API_URL = "https://api-inference.modelscope.cn/v1"
+VITE_DEEPBRICKS_API_URL = "https://api.deepbricks.ai/v1/"
+VITE_DEEPBRICKS_MODEL = "GPT-5-Chat"
+
+# 应用配置
+VITE_APP_TITLE = "ZeroTouch AI中介服务"
+VITE_APP_VERSION = "2.0.0"
+
+# 功能开关
+VITE_ENABLE_DEBUG = "false"
+VITE_ENABLE_SOUND = "true"
+VITE_ENABLE_AUTO_SCROLL = "true"
