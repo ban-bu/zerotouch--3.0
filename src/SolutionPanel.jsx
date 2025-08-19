@@ -175,6 +175,10 @@ const SolutionPanel = ({ scenario, messages, onSendMessage, isProcessing }) => {
             <div className="text-xs text-gray-500 dark:text-gray-400">
               💡 基于LLM中介的分析结果提供解决方案
             </div>
+            
+            <div className="flex items-center space-x-2 text-xs text-gray-400">
+              <span>Ctrl+Enter 快速发送</span>
+            </div>
           </div>
         </form>
       </div>

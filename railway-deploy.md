@@ -28,35 +28,13 @@
 2. **配置环境变量**
    - 在Railway控制台的Variables选项卡中添加：
    ```
-   # 基础配置
    NODE_ENV=production
    PORT=8080
-   
-   # LLM API配置 - ModelScope
-   VITE_MODELSCOPE_API_URL=https://api-inference.modelscope.cn/v1
-   VITE_MODELSCOPE_API_KEY=your-modelscope-api-key-here
-   
-   # LLM API配置 - Deepbricks  
-   VITE_DEEPBRICKS_API_URL=https://api.deepbricks.ai/v1/
-   VITE_DEEPBRICKS_MODEL=GPT-5-Chat
-   VITE_DEEPBRICKS_API_KEY=your-deepbricks-api-key-here
-   
-   # 应用配置
-   VITE_APP_TITLE=ZeroTouch AI中介服务
-   VITE_APP_VERSION=2.0.0
-   
-   # 功能开关
-   VITE_ENABLE_DEBUG=false
-   VITE_ENABLE_SOUND=true
-   VITE_ENABLE_AUTO_SCROLL=true
    ```
 
 3. **自动部署**
    - Railway会自动检测Dockerfile.railway
    - 每次push到main分支时自动重新部署
-   - 部署完成后可访问两个版本：
-     * React版本：`https://your-app.railway.app/`
-     * HTML版本：`https://your-app.railway.app/app.html`
 
 #### 方法二：使用Railway CLI
 

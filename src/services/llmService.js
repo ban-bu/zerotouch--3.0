@@ -2,14 +2,12 @@
 // Impact: 切换到 Deepbricks API，模型 GPT-4.1-mini
 // Backward Compatibility: 保留原有函数/常量命名与请求结构，调用方无需改动
 
-import { ENV_CONFIG } from '../config/env.js'
-
 // Deepbricks API配置
 const MODELSCOPE_CONFIG = {
-  // [MODIFIED] 使用环境变量配置
-  baseURL: ENV_CONFIG.DEEPBRICKS_API_URL || 'https://api.deepbricks.ai/v1/',
-  model: ENV_CONFIG.DEEPBRICKS_MODEL || 'GPT-5-Chat',
-  apiKey: ENV_CONFIG.DEEPBRICKS_API_KEY || 'sk-lNVAREVHjj386FDCd9McOL7k66DZCUkTp6IbV0u9970qqdlg'
+  // [MODIFIED]
+  baseURL: 'https://api.deepbricks.ai/v1/',
+  model: 'GPT-5-Chat',
+  apiKey: 'sk-lNVAREVHjj386FDCd9McOL7k66DZCUkTp6IbV0u9970qqdlg'
 }
 
 // 日志辅助函数（避免输出过长内容和敏感信息）
@@ -210,8 +208,8 @@ const processProblemInput = async (content, image, scenario, chatHistory = []) =
     const scenarioPrompts = {
       retail: {
         systemRole: '你是一个专业的AI沟通助手，专门在顾客与企业门店之间提供精准的需求转译和解决方案建议。你的核心职责是：1)准确理解顾客的真实需求和潜在意图 2)将其转化为企业能够理解和执行的专业描述 3)基于企业能力提供具体可行的解决方案选项。',
-        context: '场景边界：零售顾客-门店沟通。你需要同时理解双方可能存在的表达偏差：顾客可能表达不清晰或有隐含需求，企业可能用专业术语回复。\n\n核心任务：\n1. 深度理解：分析顾客的显性需求和隐性需求，识别可能的表达偏差\n2. 精准转译：将顾客需求转化为包含产品类型、使用场景、预算范围、规格要求等关键信息的专业描述\n3. 方案建议：基于转译结果，为企业提供2-3个具体可行的解决方案选项，包含产品推荐、服务建议、价格区间等\n4. 不当输入处理：遇到情绪化、粗鲁或不当表达时，避免直接重复原话，转化为专业的服务导向分析',
-        example: '例如：顾客说"我需要一件适合商务场合的衣服" → 转译："顾客需要商务正装，用于重要会议，预算待确认，需要专业形象" → 方案建议："1)推荐经典商务西装套装，价格800-1500元，包含免费修改服务 2)推荐商务休闲装，价格500-800元，适合日常商务场合 3)提供个人形象顾问服务，根据具体需求定制搭配方案"\n\n异常情况处理：遇到不当或情绪化表达 → 转译："顾客情绪较为激动，可能对服务体验存在不满，建议门店优先进行情绪安抚和问题了解" → 方案建议："1)安排专业服务人员进行一对一沟通 2)了解具体问题并提供针对性解决方案 3)提供额外的服务补偿或优惠措施"'
+        context: '场景边界：零售顾客-门店沟通。你需要同时理解双方可能存在的表达偏差：顾客可能表达不清晰或有隐含需求，企业可能用专业术语回复。\n\n核心任务：\n1. 深度理解：分析顾客的显性需求和隐性需求，识别可能的表达偏差\n2. 精准转译：将顾客需求转化为包含产品类型、使用场景、预算范围、规格要求等关键信息的专业描述\n3. 方案建议：基于转译结果，为企业提供2-3个具体可行的解决方案选项，包含产品推荐、服务建议、价格区间等',
+        example: '例如：顾客说"我需要一件适合商务场合的衣服" → 转译："顾客需要商务正装，用于重要会议，预算待确认，需要专业形象" → 方案建议："1)推荐经典商务西装套装，价格800-1500元，包含免费修改服务 2)推荐商务休闲装，价格500-800元，适合日常商务场合 3)提供个人形象顾问服务，根据具体需求定制搭配方案"'
       },
       enterprise: {
         systemRole: '你是一个专业的AI沟通助手，专门在企业跨部门之间提供精准的需求转译和解决方案建议。你的核心职责是：1)准确理解业务部门的需求和技术部门的能力边界 2)消除部门间的沟通偏差 3)提供具体可行的技术解决方案选项。',
@@ -235,26 +233,7 @@ const processProblemInput = async (content, image, scenario, chatHistory = []) =
     if (chatHistory && chatHistory.length > 0) {
       chatContext = '\n\n聊天历史上下文：\n' + 
         chatHistory.slice(-6).map((msg, index) => {
-          // 根据面板和场景正确判断角色 - 区分原话和实际看到的内容
-          let role = 'AI处理'
-          if (msg.type === 'user') {
-            if (msg.panel === 'problem') {
-              role = scenario === 'retail' ? '顾客原话' : scenario === 'enterprise' ? '市场部原话' : '学生原话'
-            } else if (msg.panel === 'solution') {
-              role = scenario === 'retail' ? '门店人员原话' : scenario === 'enterprise' ? '研发部原话' : '教师原话'
-            } else {
-              role = scenario === 'retail' ? '顾客原话' : scenario === 'enterprise' ? '市场部原话' : '学生原话'
-            }
-          } else if (msg.type === 'llm_request') {
-            // 这是翻译后方案端实际看到的内容
-            role = scenario === 'retail' ? '门店实际看到' : scenario === 'enterprise' ? '研发部实际看到' : '教师实际看到'
-          } else if (msg.type === 'ai_response') {
-            // 这是优化后问题端实际看到的内容
-            role = scenario === 'retail' ? '顾客实际看到' : scenario === 'enterprise' ? '市场部实际看到' : '学生实际看到'
-          } else if (msg.type === 'llm_processing') {
-            // 这是LLM的处理输出
-            role = 'AI翻译输出'
-          }
+          const role = msg.type === 'user' ? '客户' : msg.type === 'ai_response' ? '企业回复' : 'AI处理'
           return `${index + 1}. ${role}: ${msg.text}`
         }).join('\n')
     }
@@ -269,9 +248,7 @@ const processProblemInput = async (content, image, scenario, chatHistory = []) =
 4. 体验提升：确保回复友好、专业、有温度，提升整体沟通体验
 5. 价值传递：清晰传达方案的价值和好处，帮助客户理解选择的意义
 6. 风险预防：识别可能的误解或疑虑，主动提供澄清和保障
-7. 风格限制：严格禁止输出任何客服话术或模板化表达（如"感谢您的反馈/我们非常重视/如需帮助请联系/联系我们的客服团队/为您提供满意的解决方案/敬请谅解/忽略本次对话/继续浏览"等），禁止道歉或致谢套话；只围绕当前场景内容进行事实性与可执行性表述，不输出联系渠道或平台政策信息。
-8. 不当输入处理：遇到粗鲁、情绪化或不当表达时，严禁直接重复或引用原始内容，必须以专业方式分析潜在需求，转化为建设性的服务指导和解决方案建议。
-9. 情绪转化原则：将负面情绪识别为服务改进机会，重点分析客户可能的实际需求和期望，提供积极的解决路径。`
+7. 风格限制：严格禁止输出任何客服话术或模板化表达（如“感谢您的反馈/我们非常重视/如需帮助请联系/联系我们的客服团队/为您提供满意的解决方案/敬请谅解/忽略本次对话/继续浏览”等），禁止道歉或致谢套话；只围绕当前场景内容进行事实性与可执行性表述，不输出联系渠道或平台政策信息。`
       },
       {
         role: 'user',
@@ -356,26 +333,7 @@ const processSolutionResponse = async (content, scenario, chatHistory = []) => {
     if (chatHistory && chatHistory.length > 0) {
       chatContext = '\n\n聊天历史上下文：\n' + 
         chatHistory.slice(-6).map((msg, index) => {
-          // 根据面板和场景正确判断角色 - 区分原话和实际看到的内容
-          let role = 'AI处理'
-          if (msg.type === 'user') {
-            if (msg.panel === 'problem') {
-              role = scenario === 'retail' ? '顾客原话' : scenario === 'enterprise' ? '市场部原话' : '学生原话'
-            } else if (msg.panel === 'solution') {
-              role = scenario === 'retail' ? '门店人员原话' : scenario === 'enterprise' ? '研发部原话' : '教师原话'
-            } else {
-              role = scenario === 'retail' ? '顾客原话' : scenario === 'enterprise' ? '市场部原话' : '学生原话'
-            }
-          } else if (msg.type === 'llm_request') {
-            // 这是翻译后方案端实际看到的内容
-            role = scenario === 'retail' ? '门店实际看到' : scenario === 'enterprise' ? '研发部实际看到' : '教师实际看到'
-          } else if (msg.type === 'ai_response') {
-            // 这是优化后问题端实际看到的内容
-            role = scenario === 'retail' ? '顾客实际看到' : scenario === 'enterprise' ? '市场部实际看到' : '学生实际看到'
-          } else if (msg.type === 'llm_processing') {
-            // 这是LLM的处理输出
-            role = 'AI翻译输出'
-          }
+          const role = msg.type === 'user' ? '客户' : msg.type === 'ai_response' ? '企业回复' : msg.type === 'llm_request' ? '需求转译' : 'AI处理'
           return `${index + 1}. ${role}: ${msg.text}`
         }).join('\n')
     }
@@ -491,21 +449,7 @@ const generateEnterpriseSuggestion = async (content, scenario, chatHistory = [])
     if (chatHistory && chatHistory.length > 0) {
       chatContext = '\n\n对话历史：\n' + 
         chatHistory.slice(-4).map((msg, index) => {
-          // 根据面板和场景正确判断角色
-          let role = 'AI处理'
-          if (msg.type === 'user') {
-            if (msg.panel === 'problem') {
-              role = scenario === 'retail' ? '顾客' : scenario === 'enterprise' ? '市场部' : '学生'
-            } else if (msg.panel === 'solution') {
-              role = scenario === 'retail' ? '门店人员' : scenario === 'enterprise' ? '研发部' : '教师'
-            } else {
-              role = scenario === 'retail' ? '顾客' : scenario === 'enterprise' ? '市场部' : '学生'
-            }
-          } else if (msg.type === 'ai_response') {
-            role = 'AI优化回复'
-          } else if (msg.type === 'llm_request') {
-            role = '需求转译'
-          }
+          const role = msg.type === 'user' ? '客户' : msg.type === 'ai_response' ? '企业回复' : msg.type === 'llm_request' ? '需求转译' : 'AI处理'
           return `${index + 1}. ${role}: ${msg.text}`
         }).join('\n')
     }
@@ -615,21 +559,7 @@ const generateEnterpriseFollowUp = async (content, scenario, chatHistory = []) =
     if (chatHistory && chatHistory.length > 0) {
       chatContext = '\n\n对话历史：\n' + 
         chatHistory.slice(-4).map((msg, index) => {
-          // 根据面板和场景正确判断角色
-          let role = 'AI处理'
-          if (msg.type === 'user') {
-            if (msg.panel === 'problem') {
-              role = scenario === 'retail' ? '顾客' : scenario === 'enterprise' ? '市场部' : '学生'
-            } else if (msg.panel === 'solution') {
-              role = scenario === 'retail' ? '门店人员' : scenario === 'enterprise' ? '研发部' : '教师'
-            } else {
-              role = scenario === 'retail' ? '顾客' : scenario === 'enterprise' ? '市场部' : '学生'
-            }
-          } else if (msg.type === 'ai_response') {
-            role = 'AI优化回复'
-          } else if (msg.type === 'llm_request') {
-            role = '需求转译'
-          }
+          const role = msg.type === 'user' ? '客户' : msg.type === 'ai_response' ? '企业回复' : msg.type === 'llm_request' ? '需求转译' : 'AI处理'
           return `${index + 1}. ${role}: ${msg.text}`
         }).join('\n')
     }
@@ -637,7 +567,7 @@ const generateEnterpriseFollowUp = async (content, scenario, chatHistory = []) =
     const comprehensivePrompt = [
       {
         role: 'system',
-        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n生成追问的指导原则：\n1. 基于当前对话内容，识别信息缺口\n2. 生成3-5个有针对性的追问\n3. 追问要具体、明确，避免模糊表达\n4. 按照重要性排序\n5. 使用友好的语气，避免过于直接\n6. 风格限制：禁止输出"感谢您的反馈/我们非常重视/如需帮助请联系"等客服模板话术，只专注于针对性信息澄清。`
+        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n生成追问的指导原则：\n1. 基于当前对话内容，识别信息缺口\n2. 生成3-5个有针对性的追问\n3. 追问要具体、明确，避免模糊表达\n4. 按照重要性排序\n5. 使用友好的语气，避免过于直接\n6. 风格限制：禁止输出“感谢您的反馈/我们非常重视/如需帮助请联系”等客服模板话术，只专注于针对性信息澄清。`
       },
       {
         role: 'user',

@@ -3,7 +3,7 @@
 // Deepbricks API配置
 const MODELSCOPE_CONFIG = {
   baseURL: 'https://api.deepbricks.ai/v1/',
-  model: 'GPT-4.1-mini',
+  model: 'GPT-5-Chat',
   apiKey: 'sk-lNVAREVHjj386FDCd9McOL7k66DZCUkTp6IbV0u9970qqdlg'
 }
 
