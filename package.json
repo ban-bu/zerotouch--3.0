@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/build-html.js",
+    "build": "npm run build:react; npm run build:html",
     "build:react": "vite build",
     "build:html": "node scripts/build-html.js",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",

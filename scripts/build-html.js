@@ -32,6 +32,11 @@ console.log(`   Deepbricks Key: ${config.DEEPBRICKS_API_KEY ? '***configured***'
 try {
   // 读取原始app.html
   const appHtmlPath = path.join(projectRoot, 'app.html')
+  if (!fs.existsSync(appHtmlPath)) {
+    console.error(`❌ app.html文件不存在: ${appHtmlPath}`)
+    process.exit(1)
+  }
+  
   let htmlContent = fs.readFileSync(appHtmlPath, 'utf8')
 
   // 替换API配置
