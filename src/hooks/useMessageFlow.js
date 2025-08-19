@@ -43,13 +43,15 @@ export const useMessageFlow = (currentScenario) => {
     setLlmProcessing(true)
 
     try {
-      // 构建完整的聊天历史
+      // 构建完整的聊天历史 - 包含所有真实的对话内容
       const chatHistory = [
+        // 问题端的所有消息：用户输入 + AI优化后的回复
         ...messages.problem
           .filter(msg => msg.type === 'user' || msg.type === 'ai_response')
           .map(msg => ({ ...msg, panel: 'problem' })),
+        // 方案端的所有消息：AI转译的请求 + 企业用户输入 + AI回复
         ...messages.solution
-          .filter(msg => msg.type === 'user' || msg.type === 'ai_response')
+          .filter(msg => msg.type === 'llm_request' || msg.type === 'user' || msg.type === 'ai_response')
           .map(msg => ({ ...msg, panel: 'solution' })),
         userMessage // 包含当前消息（用户）
       ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
@@ -113,13 +115,15 @@ export const useMessageFlow = (currentScenario) => {
     setLlmProcessing(true)
 
     try {
-      // 构建完整的聊天历史
+      // 构建完整的聊天历史 - 包含所有真实的对话内容
       const chatHistory = [
+        // 问题端的所有消息：用户输入 + AI优化后的回复
         ...messages.problem
           .filter(msg => msg.type === 'user' || msg.type === 'ai_response')
           .map(msg => ({ ...msg, panel: 'problem' })),
+        // 方案端的所有消息：AI转译的请求 + 企业用户输入 + AI回复
         ...messages.solution
-          .filter(msg => msg.type === 'user' || msg.type === 'ai_response')
+          .filter(msg => msg.type === 'llm_request' || msg.type === 'user' || msg.type === 'ai_response')
           .map(msg => ({ ...msg, panel: 'solution' })),
         userMessage // 包含当前消息（企业方输入）
       ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
@@ -184,13 +188,15 @@ export const useMessageFlow = (currentScenario) => {
 
       const currentContent = recentMessages.map(msg => msg.text).join('\n')
 
-      // 构建聊天历史
+      // 构建完整的聊天历史 - 包含所有真实的对话内容
       const chatHistory = [
+        // 问题端的所有消息：用户输入 + AI优化后的回复
         ...messages.problem
           .filter(msg => msg.type === 'user' || msg.type === 'ai_response')
           .map(msg => ({ ...msg, panel: 'problem' })),
+        // 方案端的所有消息：AI转译的请求 + 企业用户输入 + AI回复
         ...messages.solution
-          .filter(msg => msg.type === 'user' || msg.type === 'ai_response')
+          .filter(msg => msg.type === 'llm_request' || msg.type === 'user' || msg.type === 'ai_response')
           .map(msg => ({ ...msg, panel: 'solution' }))
       ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
 
@@ -256,13 +262,15 @@ export const useMessageFlow = (currentScenario) => {
 
       const currentContent = recentMessages.map(msg => msg.text).join('\n')
 
-      // 构建聊天历史
+      // 构建完整的聊天历史 - 包含所有真实的对话内容
       const chatHistory = [
+        // 问题端的所有消息：用户输入 + AI优化后的回复
         ...messages.problem
           .filter(msg => msg.type === 'user' || msg.type === 'ai_response')
           .map(msg => ({ ...msg, panel: 'problem' })),
+        // 方案端的所有消息：AI转译的请求 + 企业用户输入 + AI回复
         ...messages.solution
-          .filter(msg => msg.type === 'user' || msg.type === 'ai_response')
+          .filter(msg => msg.type === 'llm_request' || msg.type === 'user' || msg.type === 'ai_response')
           .map(msg => ({ ...msg, panel: 'solution' }))
       ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
 
@@ -320,13 +328,15 @@ export const useMessageFlow = (currentScenario) => {
     setLlmProcessing(true)
 
     try {
-      // 构建聊天历史
+      // 构建完整的聊天历史 - 包含所有真实的对话内容
       const chatHistory = [
+        // 问题端的所有消息：用户输入 + AI优化后的回复
         ...messages.problem
           .filter(msg => msg.type === 'user' || msg.type === 'ai_response')
           .map(msg => ({ ...msg, panel: 'problem' })),
+        // 方案端的所有消息：AI转译的请求 + 企业用户输入 + AI回复
         ...messages.solution
-          .filter(msg => msg.type === 'user' || msg.type === 'ai_response')
+          .filter(msg => msg.type === 'llm_request' || msg.type === 'user' || msg.type === 'ai_response')
           .map(msg => ({ ...msg, panel: 'solution' }))
       ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
 
