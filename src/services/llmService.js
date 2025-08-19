@@ -32,22 +32,36 @@ const formatMessagesForLog = (messages) => {
 const callModelScopeAPI = async (messages, temperature = 0.7) => {
   try {
     const isDev = typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV
-    console.groupCollapsed('[LLM] Request')
-    console.log('model:', MODELSCOPE_CONFIG.model) // [MODIFIED]
-    console.log('temperature:', temperature)
-    console.log('messages:', formatMessagesForLog(messages))
-    console.time('[LLM] latency')
+    console.group('[LLM] Request Details')
+    console.log('🔹 Model:', MODELSCOPE_CONFIG.model)
+    console.log('🔹 Temperature:', temperature)
+    console.log('🔹 Total Messages:', messages.length)
+    
+    // 始终显示完整的prompt内容（格式化后）
+    console.group('📝 Complete Prompt Content')
+    try {
+      messages.forEach((message, index) => {
+        console.group(`💬 Message ${index + 1}: [${message.role.toUpperCase()}]`)
+        console.log(message.content)
+        console.groupEnd()
+      })
+    } catch (error) {
+      console.log('Error displaying messages:', error)
+    }
+    console.groupEnd()
+    
+    // 开发环境下额外显示JSON格式
     if (isDev) {
-      console.group('[LLM] Full Prompt')
-      try {
-        const mergedPrompt = messages.map((m, i) => `#${i + 1} [${m.role}]\n${m.content}`).join('\n\n---\n\n')
-        console.log(mergedPrompt)
-      } catch (_) {}
+      console.group('🔧 Debug Info (JSON Format)')
       try {
         console.log('messages JSON:', JSON.stringify(messages, null, 2))
-      } catch (_) {}
+      } catch (_) {
+        console.log('Failed to serialize messages to JSON')
+      }
       console.groupEnd()
     }
+    
+    console.time('[LLM] ⏱️ Request Latency')
     // [MODIFIED] Deepbricks 兼容 OpenAI Chat Completions 路由
     const response = await fetch(`${MODELSCOPE_CONFIG.baseURL}chat/completions`, {
       method: 'POST',
@@ -65,23 +79,41 @@ const callModelScopeAPI = async (messages, temperature = 0.7) => {
     })
 
     if (!response.ok) {
-      console.timeEnd('[LLM] latency')
-      console.log('status:', response.status, response.statusText)
+      console.timeEnd('[LLM] ⏱️ Request Latency')
+      console.log('❌ HTTP Status:', response.status, response.statusText)
+      console.groupEnd()
       throw new Error(`API调用失败: ${response.status} ${response.statusText}`)
     }
 
     const data = await response.json()
     const content = data?.choices?.[0]?.message?.content
-    console.timeEnd('[LLM] latency')
-    if (data?.usage) console.log('usage:', data.usage)
-    console.log('responseMessage:', truncateForLog(content))
+    
+    console.timeEnd('[LLM] ⏱️ Request Latency')
+    
+    // 显示响应信息
+    console.group('📤 Response Details')
+    if (data?.usage) {
+      console.log('💰 Token Usage:', data.usage)
+    }
+    console.log('✅ Response Length:', content?.length || 0, 'characters')
+    console.groupEnd()
+    
+    // 显示完整的响应内容
+    console.group('📋 Complete Response Content')
+    console.log(content || '(Empty response)')
+    console.groupEnd()
+    
+    // 开发环境下显示原始数据
     if (isDev) {
-      console.group('[LLM] Raw Response')
-      try { console.log('raw JSON:', JSON.stringify(data, null, 2)) } catch (_) {}
-      try { console.log('raw message:', JSON.stringify(data?.choices?.[0]?.message, null, 2)) } catch (_) {}
-      try { console.log('raw content:', data?.choices?.[0]?.message?.content) } catch (_) {}
+      console.group('🔧 Raw Response Data')
+      try { 
+        console.log('Full API Response:', JSON.stringify(data, null, 2))
+      } catch (_) {
+        console.log('Failed to serialize response data')
+      }
       console.groupEnd()
     }
+    
     console.groupEnd()
     return content
   } catch (error) {
@@ -138,6 +170,50 @@ const findFirstIndex = (text, keywords) => {
     if (idx !== -1) return { idx, keyword }
   }
   return { idx: -1, keyword: '' }
+}
+
+// 构建聊天历史上下文的通用函数，包含详细日志
+const buildChatContextWithLogging = (chatHistory, contextType = '聊天历史上下文', maxMessages = 6) => {
+  if (!chatHistory || chatHistory.length === 0) {
+    console.log('ℹ️ No chat history available for context')
+    return ''
+  }
+  
+  // 记录完整的聊天历史到控制台
+  console.group('🔍 Chat History Analysis')
+  console.log(`📊 Total History Messages: ${chatHistory.length}`)
+  console.log(`📝 Using Recent Messages: ${Math.min(chatHistory.length, maxMessages)}`)
+  
+  const recentHistory = chatHistory.slice(-maxMessages)
+  recentHistory.forEach((msg, index) => {
+    let role = 'AI处理'
+    if (msg.type === 'user') {
+      role = msg.panel === 'problem' ? '客户' : '企业端'
+    } else if (msg.type === 'ai_response') {
+      role = msg.panel === 'problem' ? '系统回复给客户' : '系统回复给企业端'
+    } else if (msg.type === 'llm_request') {
+      role = 'AI需求转译'
+    }
+    const preview = msg.text?.substring(0, 100)
+    const truncated = msg.text?.length > 100 ? '...' : ''
+    console.log(`${index + 1}. [${role}]: ${preview}${truncated}`)
+  })
+  console.groupEnd()
+  
+  const chatContext = `\n\n${contextType}：\n` + 
+    recentHistory.map((msg, index) => {
+      let role = 'AI处理'
+      if (msg.type === 'user') {
+        role = msg.panel === 'problem' ? '客户' : '企业端'
+      } else if (msg.type === 'ai_response') {
+        role = msg.panel === 'problem' ? '系统回复给客户' : '系统回复给企业端'
+      } else if (msg.type === 'llm_request') {
+        role = 'AI需求转译'
+      }
+      return `${index + 1}. ${role}: ${msg.text}`
+    }).join('\n')
+  
+  return chatContext
 }
 
 const parseSectionsRobust = (raw) => {
@@ -228,23 +304,8 @@ const processProblemInput = async (content, image, scenario, chatHistory = []) =
     }
     const prompt = scenarioPrompts[scenario]
     
-    // 构建聊天历史上下文
-    let chatContext = ''
-    if (chatHistory && chatHistory.length > 0) {
-      chatContext = '\n\n聊天历史上下文：\n' + 
-        chatHistory.slice(-6).map((msg, index) => {
-          // 根据消息类型和面板来源正确标记角色
-          let role = 'AI处理'
-          if (msg.type === 'user') {
-            role = msg.panel === 'problem' ? '客户' : '企业端'
-          } else if (msg.type === 'ai_response') {
-            role = msg.panel === 'problem' ? '系统回复给客户' : '系统回复给企业端'
-          } else if (msg.type === 'llm_request') {
-            role = 'AI需求转译'
-          }
-          return `${index + 1}. ${role}: ${msg.text}`
-        }).join('\n')
-    }
+    // 构建聊天历史上下文（包含详细日志）
+    const chatContext = buildChatContextWithLogging(chatHistory, '聊天历史上下文', 6)
     
     const comprehensivePrompt = [
       {
@@ -337,23 +398,8 @@ const processSolutionResponse = async (content, scenario, chatHistory = []) => {
     }
     const prompt = scenarioPrompts[scenario]
     
-    // 构建聊天历史上下文
-    let chatContext = ''
-    if (chatHistory && chatHistory.length > 0) {
-      chatContext = '\n\n聊天历史上下文：\n' + 
-        chatHistory.slice(-6).map((msg, index) => {
-          // 根据消息类型和面板来源正确标记角色
-          let role = 'AI处理'
-          if (msg.type === 'user') {
-            role = msg.panel === 'problem' ? '客户' : '企业端'
-          } else if (msg.type === 'ai_response') {
-            role = msg.panel === 'problem' ? '系统回复给客户' : '系统回复给企业端'
-          } else if (msg.type === 'llm_request') {
-            role = 'AI需求转译'
-          }
-          return `${index + 1}. ${role}: ${msg.text}`
-        }).join('\n')
-    }
+    // 构建聊天历史上下文（包含详细日志）
+    const chatContext = buildChatContextWithLogging(chatHistory, '聊天历史上下文', 6)
     
     const comprehensivePrompt = [
       {
@@ -462,23 +508,8 @@ const generateEnterpriseSuggestion = async (content, scenario, chatHistory = [])
     }
     const prompt = scenarioPrompts[scenario]
     
-    // 构建聊天历史上下文
-    let chatContext = ''
-    if (chatHistory && chatHistory.length > 0) {
-      chatContext = '\n\n对话历史：\n' + 
-        chatHistory.slice(-4).map((msg, index) => {
-          // 根据消息类型和面板来源正确标记角色
-          let role = 'AI处理'
-          if (msg.type === 'user') {
-            role = msg.panel === 'problem' ? '客户' : '企业端'
-          } else if (msg.type === 'ai_response') {
-            role = msg.panel === 'problem' ? '系统回复给客户' : '系统回复给企业端'
-          } else if (msg.type === 'llm_request') {
-            role = 'AI需求转译'
-          }
-          return `${index + 1}. ${role}: ${msg.text}`
-        }).join('\n')
-    }
+    // 构建聊天历史上下文（包含详细日志）
+    const chatContext = buildChatContextWithLogging(chatHistory, '对话历史', 4)
     
     const comprehensivePrompt = [
       {
@@ -580,23 +611,8 @@ const generateEnterpriseFollowUp = async (content, scenario, chatHistory = []) =
     }
     const prompt = scenarioPrompts[scenario]
     
-    // 构建聊天历史上下文
-    let chatContext = ''
-    if (chatHistory && chatHistory.length > 0) {
-      chatContext = '\n\n对话历史：\n' + 
-        chatHistory.slice(-4).map((msg, index) => {
-          // 根据消息类型和面板来源正确标记角色
-          let role = 'AI处理'
-          if (msg.type === 'user') {
-            role = msg.panel === 'problem' ? '客户' : '企业端'
-          } else if (msg.type === 'ai_response') {
-            role = msg.panel === 'problem' ? '系统回复给客户' : '系统回复给企业端'
-          } else if (msg.type === 'llm_request') {
-            role = 'AI需求转译'
-          }
-          return `${index + 1}. ${role}: ${msg.text}`
-        }).join('\n')
-    }
+    // 构建聊天历史上下文（包含详细日志）
+    const chatContext = buildChatContextWithLogging(chatHistory, '对话历史', 4)
     
     const comprehensivePrompt = [
       {
