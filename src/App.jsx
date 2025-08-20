@@ -68,6 +68,14 @@ function App() {
     iterationProcessing,
     iterationMode,
     pendingResponse,
+    // 新增的状态和方法
+    missingInfoOptions,
+    showMissingInfoPanel,
+    currentNeedsAnalysis,
+    toggleMissingInfoOption,
+    generateFollowUpBySelectedInfo,
+    skipInfoCollection,
+    // 原有方法
     sendProblemMessage,
     sendSolutionMessage,
     generateSuggestion,
@@ -296,6 +304,12 @@ function App() {
                   inputRef={solutionInputRef}
                   settings={settings}
                   iterationProcessing={iterationProcessing}
+                  // 新增：勾选框相关props
+                  missingInfoOptions={missingInfoOptions}
+                  showMissingInfoPanel={showMissingInfoPanel}
+                  onToggleMissingInfoOption={toggleMissingInfoOption}
+                  onGenerateFollowUpBySelectedInfo={generateFollowUpBySelectedInfo}
+                  onSkipInfoCollection={skipInfoCollection}
                 />
               </div>
             </AnimatedTransition>

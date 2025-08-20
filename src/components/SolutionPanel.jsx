@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Send, Users, Bot, FileText, Lightbulb, MessageSquare, CheckCircle, XCircle } from 'lucide-react'
+import { Send, Users, Bot, FileText, Lightbulb, MessageSquare, CheckCircle, XCircle, AlertCircle, ArrowRight, Check } from 'lucide-react'
 import AnimatedTransition from './AnimatedTransition'
 
 const SolutionPanel = ({ 
@@ -13,7 +13,13 @@ const SolutionPanel = ({
   onGenerateSuggestion,
   onGenerateFollowUp,
   onConfirmSend,
-  onCancelIteration
+  onCancelIteration,
+  // 新增：勾选框相关props
+  missingInfoOptions,
+  showMissingInfoPanel,
+  onToggleMissingInfoOption,
+  onGenerateFollowUpBySelectedInfo,
+  onSkipInfoCollection
 }) => {
   const [input, setInput] = useState('')
   const [finalResponse, setFinalResponse] = useState('')
@@ -127,12 +133,32 @@ const SolutionPanel = ({
                     <Bot className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
                       <div className="text-xs font-medium text-blue-700 mb-1">
-                        来自LLM的翻译需求
+                        来自LLM的智能分析需求
                       </div>
-                      {/* [MODIFIED] 单条消息滚动容器 */}
+                      {/* 需求理解 */}
+                      {message.needsAnalysis && (
+                        <div className="mb-2 p-2 bg-blue-100 rounded text-sm">
+                          <strong>需求理解：</strong>{message.needsAnalysis}
+                        </div>
+                      )}
+                      {/* 需求转译内容 */}
                       <div className="message-content">
                         <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">{message.text}</p>
                       </div>
+                      {/* 缺失信息提示 */}
+                      {message.missingInfoOptions && message.missingInfoOptions.length > 0 && (
+                        <div className="mt-2 p-2 bg-orange-100 border-l-4 border-orange-400 rounded text-sm">
+                          <div className="flex items-center space-x-1">
+                            <AlertCircle className="w-3 h-3 text-orange-600" />
+                            <span className="text-orange-800 font-medium">
+                              发现 {message.missingInfoOptions.length} 个可了解的信息点
+                            </span>
+                          </div>
+                          <div className="text-orange-700 text-xs mt-1">
+                            建议了解更多信息以提供更精准的服务
+                          </div>
+                        </div>
+                      )}
                       <div className="text-xs text-blue-600 mt-1 opacity-75">
                         {new Date(message.timestamp).toLocaleTimeString()}
                       </div>
@@ -253,6 +279,92 @@ const SolutionPanel = ({
         
         <div ref={messagesEndRef} />
       </div>
+
+      {/* 缺失信息勾选面板 */}
+      {showMissingInfoPanel && (
+        <AnimatedTransition type="slide-up" show={true}>
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 text-orange-800 dark:text-orange-200">
+                <AlertCircle className="w-5 h-5" />
+                <span className="text-sm font-semibold">选择希望了解的信息</span>
+              </div>
+              
+              <p className="text-xs text-orange-700 dark:text-orange-300">
+                AI分析发现可以了解以下信息以提供更精准的服务，请选择您希望询问的信息点：
+              </p>
+              
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {missingInfoOptions.map((option, index) => (
+                  <div 
+                    key={index}
+                    className={`p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                      option.selected 
+                        ? 'border-orange-300 bg-orange-100 dark:bg-orange-900/30' 
+                        : 'border-gray-200 bg-white dark:bg-gray-800 hover:border-orange-200'
+                    }`}
+                    onClick={() => onToggleMissingInfoOption(index)}
+                  >
+                    <div className="flex items-start space-x-3">
+                      <div className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        option.selected 
+                          ? 'border-orange-500 bg-orange-500' 
+                          : 'border-gray-300'
+                      }`}>
+                        {option.selected && (
+                          <Check className="w-3 h-3 text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900 dark:text-gray-100">
+                          {option.name}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                          {option.description}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex space-x-2">
+                <button
+                  onClick={onGenerateFollowUpBySelectedInfo}
+                  disabled={iterationProcessing || !missingInfoOptions.some(opt => opt.selected)}
+                  className="flex-1 btn-primary p-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transition-all duration-200 hover:scale-105 flex items-center justify-center space-x-2"
+                  title="生成追问"
+                >
+                  {iterationProcessing ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>生成中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ArrowRight className="w-4 h-4" />
+                      <span>生成追问 ({missingInfoOptions.filter(opt => opt.selected).length})</span>
+                    </>
+                  )}
+                </button>
+                
+                <button
+                  onClick={onSkipInfoCollection}
+                  disabled={iterationProcessing}
+                  className="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                  title="跳过，直接回复"
+                >
+                  <span>跳过</span>
+                </button>
+              </div>
+              
+              <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                选择信息点后，AI将生成自然流畅的追问供您使用
+              </div>
+            </div>
+          </div>
+        </AnimatedTransition>
+      )}
 
       {/* 迭代模式下的操作按钮 */}
       {iterationMode && (

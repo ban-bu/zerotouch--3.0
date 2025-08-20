@@ -11,6 +11,11 @@ export const useMessageFlow = (currentScenario) => {
   const [iterationProcessing, setIterationProcessing] = useState(false) // 新增：迭代处理状态
   const [iterationMode, setIterationMode] = useState(false) // 新增：迭代模式状态
   const [pendingResponse, setPendingResponse] = useState(null) // 新增：待发送的响应
+  
+  // 新增：需求分析相关状态
+  const [missingInfoOptions, setMissingInfoOptions] = useState([])
+  const [showMissingInfoPanel, setShowMissingInfoPanel] = useState(false)
+  const [currentNeedsAnalysis, setCurrentNeedsAnalysis] = useState(null)
 
   const addMessage = useCallback((panel, message) => {
     setMessages(prev => ({
@@ -56,9 +61,9 @@ export const useMessageFlow = (currentScenario) => {
         userMessage // 包含当前消息（用户）
       ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
 
-      // 处理用户输入
+      // 使用新的智能需求分析
       const llmResult = await processWithLLM({
-        type: 'problem_input',
+        type: 'analyze_needs_with_missing_info',
         content: messageData.text,
         image: messageData.image,
         context: 'problem_to_solution',
@@ -66,12 +71,37 @@ export const useMessageFlow = (currentScenario) => {
         chatHistory: chatHistory
       })
 
+      // 保存当前需求分析结果
+      setCurrentNeedsAnalysis({
+        originalContent: messageData.text,
+        image: messageData.image,
+        chatHistory: chatHistory
+      })
+
+      // 设置缺失信息选项
+      setMissingInfoOptions(llmResult.missingInfoOptions || [])
+      
       // 添加LLM处理过程到中介面板
       const llmMessage = {
         type: 'processing',
-        title: '处理问题端输入',
-        steps: llmResult.steps,
-        output: llmResult.translatedMessage,
+        title: '智能需求分析',
+        steps: [
+          {
+            name: '需求理解',
+            content: llmResult.needsUnderstanding
+          },
+          {
+            name: '需求转译',
+            content: llmResult.translation
+          },
+          {
+            name: '缺失信息分析',
+            content: llmResult.missingInfoOptions && llmResult.missingInfoOptions.length > 0 
+              ? `识别到 ${llmResult.missingInfoOptions.length} 个可了解的信息点，等待企业方选择`
+              : '需求信息较为完整，无需额外了解信息'
+          }
+        ],
+        output: llmResult.translation,
         timestamp: new Date().toISOString()
       }
       addMessage('llm', llmMessage)
@@ -79,10 +109,17 @@ export const useMessageFlow = (currentScenario) => {
       // 添加翻译后的消息到方案端
       const translatedMessage = {
         type: 'llm_request',
-        text: llmResult.translatedMessage,
-        timestamp: new Date().toISOString()
+        text: llmResult.translation,
+        timestamp: new Date().toISOString(),
+        needsAnalysis: llmResult.needsUnderstanding,
+        missingInfoOptions: llmResult.missingInfoOptions || []
       }
       addMessage('solution', translatedMessage)
+
+      // 如果有缺失信息选项，显示勾选面板
+      if (llmResult.missingInfoOptions && llmResult.missingInfoOptions.length > 0) {
+        setShowMissingInfoPanel(true)
+      }
 
     } catch (error) {
       console.error('LLM处理错误:', error)
@@ -394,18 +431,118 @@ export const useMessageFlow = (currentScenario) => {
     setPendingResponse(null)
   }, [])
 
+  // 新增：处理信息选项勾选
+  const toggleMissingInfoOption = useCallback((index) => {
+    setMissingInfoOptions(prev => 
+      prev.map((option, i) => 
+        i === index ? { ...option, selected: !option.selected } : option
+      )
+    )
+  }, [])
+
+  // 新增：生成基于选中信息的追问
+  const generateFollowUpBySelectedInfo = useCallback(async () => {
+    if (!currentNeedsAnalysis || iterationProcessing) return
+    
+    const selectedOptions = missingInfoOptions.filter(option => option.selected)
+    if (selectedOptions.length === 0) return
+
+    setIterationProcessing(true)
+
+    try {
+      // 生成追问
+      const llmResult = await processWithLLM({
+        type: 'generate_questions_by_selected_info',
+        content: {
+          originalContent: currentNeedsAnalysis.originalContent,
+          selectedInfoItems: selectedOptions
+        },
+        scenario: currentScenario,
+        chatHistory: currentNeedsAnalysis.chatHistory
+      })
+
+      // 添加LLM处理过程到中介面板
+      const llmMessage = {
+        type: 'processing',
+        title: '生成智能追问',
+        steps: [
+          {
+            name: '选中信息',
+            content: selectedOptions.map(opt => `${opt.name}：${opt.description}`).join('\n')
+          },
+          {
+            name: '生成追问',
+            content: llmResult
+          }
+        ],
+        output: llmResult,
+        timestamp: new Date().toISOString()
+      }
+      addMessage('llm', llmMessage)
+
+      // 进入迭代模式，让企业可以编辑追问内容
+      setIterationMode(true)
+      setPendingResponse(llmResult)
+      setShowMissingInfoPanel(false)
+
+    } catch (error) {
+      console.error('生成追问错误:', error)
+      const errorMessage = {
+        type: 'processing',
+        title: '生成追问出错',
+        steps: [{
+          name: '错误信息',
+          content: '抱歉，生成追问时出现了错误，请稍后重试。'
+        }],
+        timestamp: new Date().toISOString()
+      }
+      addMessage('llm', errorMessage)
+    } finally {
+      setIterationProcessing(false)
+    }
+  }, [currentNeedsAnalysis, missingInfoOptions, currentScenario, iterationProcessing, addMessage])
+
+  // 新增：跳过信息收集，直接回复
+  const skipInfoCollection = useCallback(() => {
+    setShowMissingInfoPanel(false)
+    setMissingInfoOptions([])
+    setCurrentNeedsAnalysis(null)
+  }, [])
+
+  // 新增：清空所有状态
+  const clearAllStates = useCallback(() => {
+    setMessages({
+      problem: [],
+      llm: [],
+      solution: []
+    })
+    setIterationMode(false)
+    setPendingResponse(null)
+    setMissingInfoOptions([])
+    setShowMissingInfoPanel(false)
+    setCurrentNeedsAnalysis(null)
+  }, [])
+
   return {
     messages,
     llmProcessing,
     iterationProcessing,
     iterationMode,
     pendingResponse,
+    // 新增的状态和方法
+    missingInfoOptions,
+    showMissingInfoPanel,
+    currentNeedsAnalysis,
+    toggleMissingInfoOption,
+    generateFollowUpBySelectedInfo,
+    skipInfoCollection,
+    // 原有方法
     sendProblemMessage,
     sendSolutionMessage,
     generateSuggestion,
     generateFollowUp,
     confirmSendResponse,
     cancelIteration,
-    clearMessages
+    clearMessages: clearAllStates
   }
 }

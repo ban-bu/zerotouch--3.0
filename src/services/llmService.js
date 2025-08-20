@@ -345,18 +345,43 @@ const processProblemInput = async (content, image, scenario, chatHistory = []) =
     // 构建聊天历史上下文（包含详细日志）
     const chatContext = buildChatContextWithLogging(chatHistory, '聊天历史上下文', 6)
     
+    // 为每个场景定制独立的增强指令
+    const enhancedInstructions = {
+      retail: `增强指令（零售场景专用）：
+1. 消费心理洞察：深度理解顾客的购买动机、价格敏感度、品质期望和使用场景
+2. 产品价值转译：将技术参数转化为实际使用价值，突出产品如何解决顾客的具体问题
+3. 购买决策支持：提供清晰的产品对比、性价比分析和购买建议，降低决策成本
+4. 服务体验优化：强调售前咨询、售后保障等服务价值，提升购买信心
+5. 个性化推荐：基于顾客需求特征，提供精准的产品推荐和搭配建议
+6. 促销策略融入：合理融入优惠信息、限时活动等，创造购买紧迫感
+7. 零售风格限制：避免过度推销话术，禁止使用"亲"、"哦"等非正式用语，保持专业友好的零售服务语调
+8. 零售场景不当语言处理：将顾客的不满情绪转化为具体的产品或服务改进需求，重点关注退换货、质量问题、价格争议等零售常见问题的专业化表达`,
+      
+      enterprise: `增强指令（企业场景专用）：
+1. 商业价值导向：将技术方案转化为商业收益、成本节约、效率提升等可量化的价值指标
+2. 决策层沟通：使用决策者关心的语言，突出ROI、风险控制、竞争优势等关键要素
+3. 实施路径规划：提供清晰的项目时间线、里程碑节点、资源配置和风险预案
+4. 跨部门协调：考虑不同部门的利益和关切，提供平衡各方需求的解决方案
+5. 合规性保障：确保方案符合行业规范、法律法规和企业内部政策要求
+6. 可扩展性设计：考虑企业未来发展需求，提供具有前瞻性的解决方案
+7. 企业风格限制：使用正式商务语言，避免口语化表达，保持专业严谨的企业沟通风格
+8. 企业场景不当语言处理：将部门间的冲突或不满转化为流程优化、资源配置、沟通机制等管理层面的改进建议，避免人际关系层面的直接表达`,
+      
+      education: `增强指令（教育场景专用）：
+1. 学习心理关怀：理解学生的学习压力、认知特点和情感需求，提供温暖支持的表达
+2. 知识体系构建：将复杂概念分解为易理解的知识点，建立清晰的学习路径
+3. 学习方法指导：根据不同学习风格，提供个性化的学习策略和技巧建议
+4. 成长激励导向：强调学习过程中的进步和成就，建立学生的学习信心
+5. 家校沟通桥梁：平衡学生需求和家长期望，促进有效的三方沟通
+6. 教学资源整合：合理利用教学工具、参考资料和实践机会，丰富学习体验
+7. 教育风格限制：使用鼓励性、启发性语言，避免批评或负面表达，保持积极向上的教育语调
+8. 教育场景不当语言处理：将学生的挫败感、学习困难转化为具体的学习支持需求，重点关注学习方法调整、心理疏导、个别辅导等教育专业化表达`
+    }
+
     const comprehensivePrompt = [
       {
         role: 'system',
-        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n增强指令：
-1. 上下文理解：充分利用聊天历史，理解对话的完整背景和客户的真实需求
-2. 深度优化：不仅转化语言，更要优化内容结构，确保客户获得最大价值
-3. 行动导向：提供具体的下一步行动建议，帮助客户做出明智决策
-4. 体验提升：确保回复友好、专业、有温度，提升整体沟通体验
-5. 价值传递：清晰传达方案的价值和好处，帮助客户理解选择的意义
-6. 风险预防：识别可能的误解或疑虑，主动提供澄清和保障
-7. 风格限制：严格禁止输出任何客服话术或模板化表达（如"感谢您的反馈/我们非常重视/如需帮助请联系/联系我们的客服团队/为您提供满意的解决方案/敬请谅解/忽略本次对话/继续浏览"等），禁止道歉或致谢套话；只围绕当前场景内容进行事实性与可执行性表述，不输出联系渠道或平台政策信息。
-8. 不当语言处理：严格禁止在转译结果中直接引用、重复或输出客户的任何粗俗语言、不当表达或情绪化词汇。当遇到此类输入时，应理解其背后的情绪意图，将其转化为专业、客观的问题描述，重点分析可能的不满原因和解决方向，绝不将原始不当内容传递给企业方。`
+        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n${enhancedInstructions[scenario]}`
       },
       {
         role: 'user',
@@ -439,15 +464,40 @@ const processSolutionResponse = async (content, scenario, chatHistory = []) => {
     // 构建聊天历史上下文（包含详细日志）
     const chatContext = buildChatContextWithLogging(chatHistory, '聊天历史上下文', 6)
     
+    // 为每个场景定制独立的增强指令
+    const enhancedInstructions = {
+      retail: `增强指令（零售方案优化专用）：
+1. 购买体验优化：将企业的产品介绍转化为顾客关心的实际价值和使用体验
+2. 价格透明化：清晰说明价格构成、优惠条件和性价比优势，消除价格疑虑
+3. 决策便利性：提供简单明了的购买流程和决策支持，降低购买门槛
+4. 信任建立：强调品质保证、售后服务、退换货政策等信任要素
+5. 个性化关怀：根据顾客特点提供个性化的产品建议和使用指导
+6. 零售语言风格：使用亲切但专业的语调，避免过于正式或过于随意的表达
+7. 零售场景不当语言净化：将企业端的技术术语或不当表达转化为顾客友好的日常用语`,
+      
+      enterprise: `增强指令（企业方案优化专用）：
+1. 商业价值突出：将技术方案转化为明确的商业收益和竞争优势表述
+2. 决策支持强化：提供清晰的方案对比、风险评估和实施建议
+3. 沟通效率提升：使用决策者熟悉的商业语言，避免过度技术化的表达
+4. 实施可行性：强调方案的可操作性、时间安排和资源需求
+5. 长期价值体现：突出方案对企业长期发展的战略价值
+6. 企业语言风格：保持正式专业的商务沟通风格，体现权威性和可信度
+7. 企业场景不当语言净化：将技术团队的专业术语或不当表达转化为业务友好的管理语言`,
+      
+      education: `增强指令（教育方案优化专用）：
+1. 学习价值传递：将教学安排转化为学生和家长能理解的学习价值和成长收益
+2. 学习体验优化：强调教学方法的趣味性、互动性和个性化特点
+3. 成长路径清晰：提供明确的学习目标、进度安排和成果预期
+4. 家长沟通友好：使用家长容易理解的教育语言，避免过于专业的术语
+5. 学生激励导向：强调学习的乐趣和成就感，建立学习信心
+6. 教育语言风格：使用温暖鼓励的语调，体现教育的关怀和专业性
+7. 教育场景不当语言净化：将教师的专业术语或不当表达转化为学生和家长友好的教育语言`
+    }
+
     const comprehensivePrompt = [
       {
         role: 'system',
-        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n增强指令：
-1. 上下文理解：读取聊天记录，理解和预测客户的真实需求
-2. 行动导向：提供下一步行动建议（以'需要我这边......吗？'为开头），启发客户做出决策
-3. 转译后的内容需要简洁、make-sense，有温度
-4. 识别可能的误解或疑虑，主动提供澄清和保障
-5. 不当语言处理：严格禁止在优化回复中直接引用、重复或输出企业端的任何粗俗语言、不当表达或情绪化词汇。当遇到此类输入时，应理解其背后的情绪意图，将其转化为专业、客观的表述，绝不将原始不当内容传递给客户。`
+        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n${enhancedInstructions[scenario]}`
       },
       {
         role: 'user',
@@ -546,10 +596,40 @@ const generateEnterpriseSuggestion = async (content, scenario, chatHistory = [])
     // 构建聊天历史上下文（包含详细日志）
     const chatContext = buildChatContextWithLogging(chatHistory, '对话历史', 4)
     
+    // 为每个场景定制独立的增强指令
+    const enhancedInstructions = {
+      retail: `生成建议的指导原则（零售企业专用）：
+1. 销售策略优化：基于顾客需求特征，提供精准的产品推荐和销售策略
+2. 库存与供应链：考虑商品库存、季节性因素和供应链效率
+3. 客户关系管理：提供客户维护、复购促进和口碑营销的具体建议
+4. 价格策略制定：平衡利润空间和市场竞争力，提供灵活的定价建议
+5. 服务体验提升：优化售前咨询、售中服务和售后保障的全流程体验
+6. 零售运营实用性：确保建议符合零售行业特点，易于门店执行
+7. 零售场景不当语言处理：将顾客的不满转化为服务改进和产品优化的具体行动方案`,
+      
+      enterprise: `生成建议的指导原则（企业服务专用）：
+1. 商业价值量化：提供可衡量的ROI、成本节约和效率提升指标
+2. 技术可行性评估：平衡技术先进性和实施可行性，提供风险控制建议
+3. 组织变革管理：考虑人员培训、流程调整和文化适应的变革建议
+4. 合规与安全保障：确保建议符合行业规范和企业安全政策要求
+5. 分阶段实施规划：提供渐进式实施方案，降低业务中断风险
+6. 企业决策支持：使用决策层关心的商业语言，突出战略价值
+7. 企业场景不当语言处理：将部门冲突转化为流程优化和协作机制改进建议`,
+      
+      education: `生成建议的指导原则（教育服务专用）：
+1. 学习效果导向：基于学习目标和学生特点，提供个性化的教学建议
+2. 教学资源配置：合理利用师资、教材和教学设备，优化资源配置
+3. 学习进度管理：提供差异化的学习进度安排和能力提升路径
+4. 家校协作促进：建立有效的家校沟通机制，形成教育合力
+5. 学习兴趣培养：注重学习动机激发和兴趣维持的方法建议
+6. 教育专业性保障：确保建议符合教育规律和学生身心发展特点
+7. 教育场景不当语言处理：将学习困难转化为教学方法调整和学习支持优化建议`
+    }
+
     const comprehensivePrompt = [
       {
         role: 'system',
-        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n生成建议的指导原则：\n1. 基于当前对话内容，提供具体可行的建议\n2. 考虑企业能力和资源限制\n3. 提供多个选项供企业选择\n4. 包含具体的实施步骤和预期效果\n5. 避免过于理论化的建议，注重实用性\n6. 风格限制：禁止输出任何客服模板话术或联系/投诉引导语，只专注于专业建议与实施细节。\n7. 不当语言处理：严格禁止在建议中直接引用、重复或输出任何粗俗语言、不当表达或情绪化词汇。当遇到此类输入时，应理解其背后的情绪意图，将其转化为专业、客观的建议内容。`
+        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n${enhancedInstructions[scenario]}`
       },
       {
         role: 'user',
@@ -649,10 +729,40 @@ const generateEnterpriseFollowUp = async (content, scenario, chatHistory = []) =
     // 构建聊天历史上下文（包含详细日志）
     const chatContext = buildChatContextWithLogging(chatHistory, '对话历史', 4)
     
+    // 为每个场景定制独立的增强指令
+    const enhancedInstructions = {
+      retail: `追问生成的指导原则（零售企业专用）：
+1. 销售机会挖掘：识别顾客潜在需求，生成促进成交的关键追问
+2. 产品匹配精准度：通过追问了解顾客具体使用场景和偏好
+3. 价格敏感度探测：巧妙了解顾客预算范围和价值认知
+4. 竞品对比分析：了解顾客对竞争产品的认知和比较标准
+5. 购买决策流程：识别影响购买决策的关键因素和决策人
+6. 零售场景适应性：确保追问方式符合零售环境的沟通特点
+7. 零售场景不当语言处理：将顾客的抱怨转化为了解真实需求的追问机会`,
+      
+      enterprise: `追问生成的指导原则（企业服务专用）：
+1. 业务需求深度挖掘：通过追问了解企业真实的业务痛点和目标
+2. 决策链条识别：了解企业内部决策流程和关键决策人
+3. 预算与时间约束：探明项目预算范围和实施时间要求
+4. 技术环境评估：了解企业现有技术架构和集成要求
+5. 风险承受能力：评估企业对新技术和变革的接受程度
+6. 企业级专业性：使用企业决策者熟悉的商业语言进行追问
+7. 企业场景不当语言处理：将内部分歧转化为了解各部门需求的追问策略`,
+      
+      education: `追问生成的指导原则（教育服务专用）：
+1. 学习目标明确化：通过追问了解具体的学习目标和期望成果
+2. 学习能力评估：了解学生当前水平、学习习惯和能力特点
+3. 学习环境分析：探明家庭学习环境和学校教学条件
+4. 学习动机激发：了解学生兴趣点和学习动力来源
+5. 家长期望管理：平衡家长期望和学生实际能力的差异
+6. 教育专业性保障：确保追问符合教育规律和学生心理特点
+7. 教育场景不当语言处理：将学习挫折转化为了解学习障碍的追问机会`
+    }
+
     const comprehensivePrompt = [
       {
         role: 'system',
-        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n生成追问的指导原则：\n1. 基于当前对话内容，识别信息缺口\n2. 生成3-5个有针对性的追问\n3. 追问要具体、明确，避免模糊表达\n4. 按照重要性排序\n5. 使用友好的语气，避免过于直接\n6. 风格限制：禁止输出"感谢您的反馈/我们非常重视/如需帮助请联系"等客服模板话术，只专注于针对性信息澄清。\n7. 不当语言处理：严格禁止在追问中直接引用、重复或输出任何粗俗语言、不当表达或情绪化词汇。当遇到此类输入时，应理解其背后的情绪意图，将其转化为专业、客观的追问内容。`
+        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n${enhancedInstructions[scenario]}`
       },
       {
         role: 'user',
@@ -791,11 +901,222 @@ const optimizeForUser = async (content) => {
   return await callModelScopeAPI(prompt)
 }
 
+// 智能需求分析和信息缺失检测 - 精准版本
+const analyzeCustomerNeedsWithMissingInfo = async (content, image, scenario, chatHistory = []) => {
+  try {
+    const scenarioPrompts = {
+      retail: {
+        systemRole: '你是专业的零售需求分析专家，能够针对任何产品精准识别具体的关键信息点。',
+        instruction: `分析用户需求时，要生成具体的、可操作的信息选项，而不是抽象概念。
+
+例如：
+- 用户说"我要买件衣服" → 生成：尺码、颜色、价位、场合、材质
+- 用户说"我要买个手机" → 生成：预算、品牌、功能需求、存储容量、颜色
+- 用户说"我要装修" → 生成：面积、风格、预算、时间、房间类型
+
+要求：
+1. 每个选项名称2-4个字，简洁明了
+2. 必须是具体的、可直接询问的信息点
+3. 与该产品/服务直接相关，不要抽象概念
+4. 按重要性排序，最重要的放前面`
+      },
+      enterprise: {
+        systemRole: '你是专业的企业需求分析专家，能够针对任何业务需求精准识别具体的关键信息点。',
+        instruction: `分析业务需求时，要生成具体的、可操作的信息选项，而不是抽象概念。
+
+例如：
+- 用户说"我要开发系统" → 生成：预算规模、开发周期、用户数量、核心功能、技术栈
+- 用户说"我要做营销" → 生成：目标客群、推广渠道、活动预算、效果期望、时间安排
+- 用户说"我要培训员工" → 生成：培训人数、培训内容、时间安排、培训方式、预算范围
+
+要求：
+1. 每个选项名称2-4个字，简洁明了
+2. 必须是具体的、可直接询问的信息点
+3. 与该业务需求直接相关，不要抽象概念
+4. 按重要性排序，最重要的放前面`
+      },
+      education: {
+        systemRole: '你是专业的教育需求分析专家，能够针对任何学习需求精准识别具体的关键信息点。',
+        instruction: `分析学习需求时，要生成具体的、可操作的信息选项，而不是抽象概念。
+
+例如：
+- 用户说"我要学英语" → 生成：当前水平、学习目标、时间安排、学习方式、预算考虑
+- 用户说"孩子要补数学" → 生成：年级阶段、薄弱环节、上课时间、期望效果、费用预算
+- 用户说"我要考证" → 生成：考试时间、基础情况、学习时间、培训方式、通过目标
+
+要求：
+1. 每个选项名称2-4个字，简洁明了
+2. 必须是具体的、可直接询问的信息点
+3. 与该学习需求直接相关，不要抽象概念
+4. 按重要性排序，最重要的放前面`
+      }
+    }
+
+    const prompt = scenarioPrompts[scenario]
+    if (!prompt) {
+      throw new Error(`不支持的场景类型: ${scenario}`)
+    }
+
+    // 构建聊天历史上下文
+    const chatContext = buildChatContextWithLogging(chatHistory, '聊天历史上下文', 6)
+
+    const comprehensivePrompt = [
+      {
+        role: 'system',
+        content: `${prompt.systemRole}
+
+${prompt.instruction}
+
+请按以下格式输出：
+
+【需求理解】
+简明扼要地总结用户的核心需求（不超过30字）
+
+【信息选项】
+针对这个具体需求，生成3-5个关键信息选项。格式：
+选项名称|询问这个信息的原因和价值
+
+例如：
+尺码|了解您的具体尺寸以推荐最合适的版型
+预算|根据您的价格范围推荐性价比最佳的产品
+
+【需求转译】
+将用户需求转化为专业描述，传达给企业方`
+      },
+      {
+        role: 'user', 
+        content: `用户输入："${content}"${image ? '\n（用户还上传了一张图片）' : ''}${chatContext}
+
+请针对这个具体需求，生成精准的信息选项。`
+      }
+    ]
+
+    const result = await callModelScopeAPI(comprehensivePrompt, 0.1)
+    const sanitizedResult = sanitizeOutput(result)
+    
+    // 解析结果
+    const needsMatch = sanitizedResult.match(/【需求理解】\s*\n([\s\S]*?)(?=\n【|$)/)
+    const optionsMatch = sanitizedResult.match(/【信息选项】\s*\n([\s\S]*?)(?=\n【|$)/)
+    const translationMatch = sanitizedResult.match(/【需求转译】\s*\n([\s\S]*?)(?=\n【|$)/)
+
+    const needsUnderstanding = needsMatch ? needsMatch[1].trim() : '需求分析'
+    const optionsText = optionsMatch ? optionsMatch[1].trim() : ''
+    const translation = translationMatch ? translationMatch[1].trim() : content
+
+    // 解析信息选项
+    const missingInfoOptions = []
+    if (optionsText) {
+      const lines = optionsText.split('\n').filter(line => line.trim())
+      for (const line of lines) {
+        // 匹配格式：选项名称|说明
+        const match = line.match(/^[•\-\*]?\s*([^|]{2,8})\|(.+)$/)
+        if (match) {
+          missingInfoOptions.push({
+            name: match[1].trim(),
+            description: match[2].trim(),
+            selected: false
+          })
+        }
+      }
+    }
+
+    console.log('[LLM] 智能需求分析结果:', {
+      needsUnderstanding,
+      missingInfoOptions,
+      translation
+    })
+
+    return {
+      needsUnderstanding,
+      missingInfoOptions,
+      translation,
+      structuredOutput: {
+        needsUnderstanding,
+        missingInfoOptions,
+        translation
+      }
+    }
+
+  } catch (error) {
+    console.error('智能需求分析错误:', error)
+    throw error
+  }
+}
+
+// 基于选中的信息生成追问
+const generateQuestionsBySelectedInfo = async (originalContent, selectedInfoItems, scenario, chatHistory = []) => {
+  try {
+    const scenarioPrompts = {
+      retail: {
+        systemRole: '你是专业的零售销售顾问，擅长根据顾客需求生成自然、友好的追问。',
+        questionStyle: '友好亲切，专业但不生硬，让顾客感到被重视和理解'
+      },
+      enterprise: {
+        systemRole: '你是专业的企业服务顾问，擅长根据业务需求生成专业、高效的追问。',
+        questionStyle: '专业严谨，逻辑清晰，体现商业洞察力和执行效率'
+      },
+      education: {
+        systemRole: '你是专业的教育咨询顾问，擅长根据学习需求生成温暖、启发性的追问。',
+        questionStyle: '温暖鼓励，循循善诱，既了解需求又给予学习信心'
+      }
+    }
+
+    const prompt = scenarioPrompts[scenario]
+    if (!prompt) {
+      throw new Error(`不支持的场景类型: ${scenario}`)
+    }
+
+    const selectedItems = selectedInfoItems.map(item => `${item.name}：${item.description}`).join('\n')
+    const chatContext = buildChatContextWithLogging(chatHistory, '聊天历史上下文', 6)
+
+    const comprehensivePrompt = [
+      {
+        role: 'system',
+        content: `${prompt.systemRole}
+
+风格要求：${prompt.questionStyle}
+
+任务：基于用户的原始需求和企业选中的信息点，生成一个自然的追问。
+
+要求：
+1. 追问要自然流畅，像真人对话一样
+2. 一次性询问所有选中的信息点，但要组织得自然
+3. 体现对顾客需求的理解和专业性
+4. 长度控制在80字以内
+5. 不要使用"请问"开头，要更自然`
+      },
+      {
+        role: 'user',
+        content: `原始需求："${originalContent}"
+
+企业选中的信息点：
+${selectedItems}
+
+${chatContext}
+
+请生成一个自然的追问，询问这些信息。`
+      }
+    ]
+
+    const result = await callModelScopeAPI(comprehensivePrompt, 0.3)
+    return sanitizeOutput(result)
+
+  } catch (error) {
+    console.error('生成追问错误:', error)
+    throw error
+  }
+}
+
 // 主要的LLM处理函数
 export const processWithLLM = async ({ type, content, image, context, scenario, chatHistory = [] }) => {
   try {
     if (type === 'problem_input') {
       return await processProblemInput(content, image, scenario, chatHistory)
+    } else if (type === 'analyze_needs_with_missing_info') {
+      return await analyzeCustomerNeedsWithMissingInfo(content, image, scenario, chatHistory)
+    } else if (type === 'generate_questions_by_selected_info') {
+      const { originalContent, selectedInfoItems } = content
+      return await generateQuestionsBySelectedInfo(originalContent, selectedInfoItems, scenario, chatHistory)
     } else if (type === 'solution_response') {
       return await processSolutionResponse(content, scenario, chatHistory)
     } else if (type === 'generate_suggestion') {
