@@ -477,9 +477,9 @@ const processSolutionResponse = async (content, scenario, chatHistory = []) => {
   try {
     const scenarioPrompts = {
       retail: {
-        systemRole: '你是话术转译者，负责将企业的文字表述转化为顾客听得懂的理解，be brief，clear，approachable。不要分点写。用完整的句子写。两句话以内，不超过30个字。',
-        context: '在零售场景中，企业通常会提供产品信息、价格方案、服务条款等专业内容。你的任务是将这些内容转化为客户容易理解和接受的语言，同时提供具体的行动建议，帮助客户做出购买决策。',
-        example: '企业回复："该产品采用进口材料，符合国际标准，批发价格为单价80元，起订量100件。"\n优化后："这款产品使用的是进口优质材料，品质有保障。如果您需要100件以上，我们可以给您80元/件的优惠价格。建议您可以先确认一下具体需要的数量，我们为您计算总价和配送方案。"'
+        systemRole: '你是专业的客户沟通专家，负责将企业的专业表述转化为顾客友好、易懂的完整回复。要求be brief，clear，approachable。不要分点写。用完整的句子写。两句话以内，不超过30个字。自然地融入必要的建议。',
+        context: '在零售场景中，企业通常会提供产品信息、价格方案、服务条款等专业内容。你的任务是将这些内容转化为客户容易理解和接受的简洁回复，自然地融入行动建议，帮助客户解决问题或做出决策。',
+        example: '企业回复："该产品采用进口材料，符合国际标准，批发价格为单价80元，起订量100件。"\n优化后："这款产品进口材料，品质保障。100件以上80元/件，您确认下数量我来报价。"'
       },
       enterprise: {
         systemRole: '你是一位专业的企业服务AI助手，专门负责将技术方案和商业提案转化为决策者易懂的表达，同时智能过滤和转化不当表达，确保沟通专业化。',
@@ -538,19 +538,19 @@ const processSolutionResponse = async (content, scenario, chatHistory = []) => {
       },
       {
         role: 'user',
-        content: `企业方案端回复："${content}"${chatContext}\n\n请按照以下结构输出：\n\n【优化回复】\n将企业回复转化为客户友好、易懂的表达，包含关键信息和价值点\n\n【行动建议】\n基于当前情况，为客户提供2-3个具体的下一步行动选项：\n选项1：[具体行动描述，包含预期结果]\n选项2：[具体行动描述，包含预期结果]\n选项3：[具体行动描述，包含预期结果]\n\n【补充说明】\n如有需要补充的重要信息或注意事项，请列出（如无则写"无"）`
+        content: `企业方案端回复："${content}"${chatContext}\n\n请按照以下结构输出：\n\n【优化回复】\n将企业回复转化为客户友好、易懂的完整表达。如果需要给客户提供行动建议，请直接融入到回复中，使用自然的语言，不要使用"选项1、选项2"这种格式，而是用"您可以..."、"建议您..."、"如果您需要..."这样的自然表达。\n\n【内部备注】\n（仅供系统参考，不发送给客户）记录处理要点和注意事项\n\n【补充说明】\n如有需要单独说明的重要信息，请列出（如无则写"无"）`
       }
     ]
     const resultRaw = await callModelScopeAPI(comprehensivePrompt, 0.1)
     const result = sanitizeOutput(resultRaw)
 
     // 解析结构化输出
-    const optimizedReplyMatch = result.match(/【优化回复】\s*([\s\S]*?)(?=【行动建议】|$)/)
-    const actionSuggestionsMatch = result.match(/【行动建议】\s*([\s\S]*?)(?=【补充说明】|$)/)
+    const optimizedReplyMatch = result.match(/【优化回复】\s*([\s\S]*?)(?=【内部备注】|【补充说明】|$)/)
+    const internalNotesMatch = result.match(/【内部备注】\s*([\s\S]*?)(?=【补充说明】|$)/)
     const additionalInfoMatch = result.match(/【补充说明】\s*([\s\S]*?)$/)
     
     const optimizedReply = optimizedReplyMatch ? optimizedReplyMatch[1].trim() : result
-    const actionSuggestions = actionSuggestionsMatch ? actionSuggestionsMatch[1].trim() : ''
+    const internalNotes = internalNotesMatch ? internalNotesMatch[1].trim() : ''
     const additionalInfo = additionalInfoMatch ? additionalInfoMatch[1].trim() : ''
 
     // 构建详细的步骤显示
@@ -561,10 +561,10 @@ const processSolutionResponse = async (content, scenario, chatHistory = []) => {
       }
     ]
     
-    if (actionSuggestions && actionSuggestions !== '无') {
+    if (internalNotes && internalNotes !== '无') {
       steps.push({
-        name: '行动建议',
-        content: actionSuggestions
+        name: '内部备注',
+        content: internalNotes
       })
     }
     
@@ -575,17 +575,15 @@ const processSolutionResponse = async (content, scenario, chatHistory = []) => {
       })
     }
 
-    // 构建最终的优化消息
+    // 构建最终的优化消息（发送给客户）
+    // 优化回复现在已经包含了自然融入的建议，所以不需要单独添加"选项"格式的内容
     let optimizedMessage = optimizedReply
-    if (actionSuggestions && actionSuggestions !== '无') {
-      optimizedMessage += '\n\n' + actionSuggestions
-    }
     if (additionalInfo && additionalInfo !== '无') {
       optimizedMessage += '\n\n' + additionalInfo
     }
 
     console.groupCollapsed('[LLM] Parsed -> solution_response')
-    console.log('structuredOutput:', { optimizedReply, actionSuggestions, additionalInfo })
+    console.log('structuredOutput:', { optimizedReply, internalNotes, additionalInfo })
     console.log('optimizedMessage:', truncateForLog(optimizedMessage))
     console.groupEnd()
 
@@ -594,7 +592,7 @@ const processSolutionResponse = async (content, scenario, chatHistory = []) => {
        optimizedMessage,
        structuredOutput: {
          optimizedReply,
-         actionSuggestions,
+         internalNotes,
          additionalInfo
        }
      }
