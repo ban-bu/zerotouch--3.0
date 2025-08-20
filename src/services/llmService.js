@@ -629,59 +629,29 @@ const generateEnterpriseSuggestion = async (content, scenario, chatHistory = [])
     const comprehensivePrompt = [
       {
         role: 'system',
-        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n${enhancedInstructions[scenario]}`
+        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n重要要求：回答必须简洁明了，总字数不超过50个字，直接给出最核心的建议。`
       },
       {
         role: 'user',
-        content: `当前对话内容："${content}"${chatContext}\n\n请为企业提供专业的建议，包括：\n\n【核心建议】\n基于当前情况的主要建议\n\n【具体方案】\n提供2-3个具体的实施方案\n\n【实施要点】\n关键的实施步骤和注意事项`
+        content: `当前对话内容："${content}"${chatContext}\n\n请为企业提供一个简洁的专业建议（不超过50字）。`
       }
     ]
     
     const resultRaw = await callModelScopeAPI(comprehensivePrompt, 0.3)
     const result = sanitizeOutput(resultRaw)
 
-    // 解析结构化输出
-    const coreSuggestionMatch = result.match(/【核心建议】\s*([\s\S]*?)(?=【具体方案】|$)/)
-    const specificPlansMatch = result.match(/【具体方案】\s*([\s\S]*?)(?=【实施要点】|$)/)
-    const implementationMatch = result.match(/【实施要点】\s*([\s\S]*?)$/)
-    
-    const coreSuggestion = coreSuggestionMatch ? coreSuggestionMatch[1].trim() : result
-    const specificPlans = specificPlansMatch ? specificPlansMatch[1].trim() : ''
-    const implementation = implementationMatch ? implementationMatch[1].trim() : ''
+    // 简化处理，直接使用结果
+    const suggestionMessage = result.trim()
 
     // 构建步骤显示
     const steps = [
       {
-        name: '核心建议',
-        content: coreSuggestion
+        name: '建议内容',
+        content: suggestionMessage
       }
     ]
-    
-    if (specificPlans) {
-      steps.push({
-        name: '具体方案',
-        content: specificPlans
-      })
-    }
-    
-    if (implementation) {
-      steps.push({
-        name: '实施要点',
-        content: implementation
-      })
-    }
-
-    // 构建完整的建议消息
-    let suggestionMessage = coreSuggestion
-    if (specificPlans) {
-      suggestionMessage += '\n\n' + specificPlans
-    }
-    if (implementation) {
-      suggestionMessage += '\n\n' + implementation
-    }
 
     console.groupCollapsed('[LLM] Parsed -> generate_suggestion')
-    console.log('structuredOutput:', { coreSuggestion, specificPlans, implementation })
     console.log('suggestionMessage:', truncateForLog(suggestionMessage))
     console.groupEnd()
 
@@ -689,9 +659,7 @@ const generateEnterpriseSuggestion = async (content, scenario, chatHistory = [])
       steps,
       suggestionMessage,
       structuredOutput: {
-        coreSuggestion,
-        specificPlans,
-        implementation
+        suggestion: suggestionMessage
       }
     }
   } catch (error) {
@@ -762,56 +730,29 @@ const generateEnterpriseFollowUp = async (content, scenario, chatHistory = []) =
     const comprehensivePrompt = [
       {
         role: 'system',
-        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n${enhancedInstructions[scenario]}`
+        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n重要要求：生成的追问必须简洁自然，总字数不超过50个字，直接询问最关键的信息。`
       },
       {
         role: 'user',
-        content: `当前对话内容："${content}"${chatContext}\n\n请生成有针对性的追问，帮助更好地了解需求：\n\n【关键信息缺口】\n识别当前对话中缺失的关键信息\n\n【追问建议】\n提供3-5个具体的追问问题\n\n【追问策略】\n建议的追问顺序和方式`
+        content: `当前对话内容："${content}"${chatContext}\n\n请生成一个简洁的追问（不超过50字），了解关键信息。`
       }
     ]
     
     const resultRaw = await callModelScopeAPI(comprehensivePrompt, 0.3)
     const result = sanitizeOutput(resultRaw)
 
-    // 解析结构化输出
-    const infoGapsMatch = result.match(/【关键信息缺口】\s*([\s\S]*?)(?=【追问建议】|$)/)
-    const followUpQuestionsMatch = result.match(/【追问建议】\s*([\s\S]*?)(?=【追问策略】|$)/)
-    const strategyMatch = result.match(/【追问策略】\s*([\s\S]*?)$/)
-    
-    const infoGaps = infoGapsMatch ? infoGapsMatch[1].trim() : ''
-    const followUpQuestions = followUpQuestionsMatch ? followUpQuestionsMatch[1].trim() : result
-    const strategy = strategyMatch ? strategyMatch[1].trim() : ''
+    // 简化处理，直接使用结果
+    const followUpMessage = result.trim()
 
     // 构建步骤显示
     const steps = [
       {
-        name: '信息缺口分析',
-        content: infoGaps || '基于当前对话分析需要进一步了解的信息'
+        name: '追问内容',
+        content: followUpMessage
       }
     ]
-    
-    if (followUpQuestions) {
-      steps.push({
-        name: '追问建议',
-        content: followUpQuestions
-      })
-    }
-    
-    if (strategy) {
-      steps.push({
-        name: '追问策略',
-        content: strategy
-      })
-    }
-
-    // 构建完整的追问消息
-    let followUpMessage = followUpQuestions
-    if (strategy) {
-      followUpMessage += '\n\n' + strategy
-    }
 
     console.groupCollapsed('[LLM] Parsed -> generate_followup')
-    console.log('structuredOutput:', { infoGaps, followUpQuestions, strategy })
     console.log('followUpMessage:', truncateForLog(followUpMessage))
     console.groupEnd()
 
@@ -819,9 +760,7 @@ const generateEnterpriseFollowUp = async (content, scenario, chatHistory = []) =
       steps,
       followUpMessage,
       structuredOutput: {
-        infoGaps,
-        followUpQuestions,
-        strategy
+        followUp: followUpMessage
       }
     }
   } catch (error) {
