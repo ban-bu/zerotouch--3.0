@@ -201,16 +201,45 @@ function App() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 transition-colors duration-300">
+      <div 
+        className="min-h-screen relative overflow-hidden transition-colors duration-300"
+        style={settings.darkMode ? {
+          background: `
+            radial-gradient(circle at 30% 40%, rgba(68, 64, 60, 0.2) 0%, transparent 60%),
+            radial-gradient(circle at 70% 20%, rgba(41, 37, 36, 0.15) 0%, transparent 60%),
+            radial-gradient(circle at 40% 80%, rgba(28, 25, 23, 0.12) 0%, transparent 60%),
+            linear-gradient(135deg, #292524 0%, #1c1917 30%, #0c0a09 100%)
+          `
+        } : {
+          background: `
+            radial-gradient(circle at 25% 35%, rgba(168, 162, 158, 0.15) 0%, transparent 70%),
+            radial-gradient(circle at 75% 25%, rgba(214, 211, 209, 0.12) 0%, transparent 70%),
+            radial-gradient(circle at 50% 80%, rgba(120, 113, 108, 0.1) 0%, transparent 70%),
+            linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 30%, #d6d3d1 100%)
+          `
+        }}
+      >
+        {/* 动态背景装饰元素 */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-10 -right-10 w-80 h-80 bg-gradient-to-r from-stone-400/15 to-amber-600/15 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-10 -left-10 w-96 h-96 bg-gradient-to-r from-stone-500/12 to-orange-600/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-stone-300/8 to-amber-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        </div>
         {/* Header */}
         <header className="glass-effect shadow-lg border-b border-white/20 backdrop-blur-md" style={{zIndex: 100, position: 'relative'}}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-4">
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold" style={{
+                  color: settings.darkMode ? '#f8fafc' : '#1f2937',
+                  textShadow: settings.darkMode ? '0 1px 2px rgba(0, 0, 0, 0.5)' : '0 1px 2px rgba(255, 255, 255, 0.8)'
+                }}>
                   GenAI ZeroTouch Services
                 </h1>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm" style={{
+                  color: settings.darkMode ? '#9ca3af' : '#6b7280',
+                  textShadow: settings.darkMode ? '0 1px 2px rgba(0, 0, 0, 0.3)' : '0 1px 2px rgba(255, 255, 255, 0.5)'
+                }}>
                   零摩擦沟通系统
                 </span>
               </div>
@@ -243,16 +272,24 @@ function App() {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Scenario Info */}
           <AnimatedTransition type="slide-down" show={true}>
-            <div className="mb-6 p-6 glass-effect rounded-xl shadow-lg border border-white/20">
+            <div className="mb-6 p-6 glass-panel shadow-lg">
               <div className="flex items-center space-x-4">
-                <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg">
-                  <scenario.icon className="w-6 h-6 text-white" />
+                <div className="relative p-3 rounded-xl overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 opacity-90"></div>
+                  <div className="absolute inset-0 bg-white/20 backdrop-filter blur-sm"></div>
+                  <scenario.icon className="w-6 h-6 text-white relative z-10" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h2 className="text-xl font-bold" style={{ 
+                    color: settings.darkMode ? '#f8fafc' : '#1f2937',
+                    textShadow: settings.darkMode ? '0 1px 2px rgba(0, 0, 0, 0.5)' : '0 1px 2px rgba(255, 255, 255, 0.8)'
+                  }}>
                     {scenario.name}
                   </h2>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                  <p className="text-sm mt-1" style={{
+                    color: settings.darkMode ? '#d1d5db' : '#374151',
+                    textShadow: settings.darkMode ? '0 1px 2px rgba(0, 0, 0, 0.3)' : '0 1px 2px rgba(255, 255, 255, 0.5)'
+                  }}>
                     {scenario.description}
                   </p>
                 </div>
@@ -319,7 +356,7 @@ function App() {
           <div className="text-center">
             <button
               onClick={clearMessages}
-              className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+              className="btn-secondary"
             >
               清空对话
             </button>

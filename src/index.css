@@ -8,44 +8,55 @@
   }
   
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply text-gray-700;
+    background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%);
+    color: #374151;
   }
 }
 
 @layer components {
   .panel {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+    @apply bg-stone-50/85 backdrop-blur-sm rounded-3xl shadow-lg border-0 p-6;
+    box-shadow: 0 8px 32px rgba(120, 113, 108, 0.12);
+    border: 1px solid rgba(168, 162, 158, 0.2);
   }
   
   .panel-header {
-    @apply text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100;
+    @apply text-lg font-semibold text-stone-700 mb-4 pb-2 border-b border-stone-300/50 bg-stone-50/80 backdrop-blur-sm rounded-t-2xl px-4 py-3;
   }
   
   .message-bubble {
-    @apply p-3 rounded-lg mb-3 max-w-full;
+    @apply p-4 rounded-2xl mb-3 max-w-full backdrop-blur-sm;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   }
   
   .message-user {
-    @apply bg-primary-100 text-primary-900 ml-auto;
+    @apply bg-stone-600/90 text-stone-50 ml-auto;
+    border-radius: 20px 20px 6px 20px;
   }
   
   .message-ai {
-    @apply bg-gray-100 text-gray-900;
+    @apply bg-stone-100/70 text-stone-700 border border-stone-300/50;
+    border-radius: 20px 20px 20px 6px;
   }
   
   .message-system {
-    @apply bg-secondary-100 text-secondary-900;
+    @apply bg-amber-50/70 text-amber-800 border border-amber-200/50;
+    border-radius: 16px;
   }
   
   .input-field {
-    @apply w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none;
+    @apply w-full p-3 border border-stone-300/50 rounded-2xl focus:ring-2 focus:ring-stone-400/50 focus:border-stone-400/50 resize-none bg-stone-50/80 backdrop-blur-sm text-stone-700;
+    box-shadow: 0 2px 8px rgba(120, 113, 108, 0.08);
   }
   
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+    @apply bg-stone-600 hover:bg-stone-700 text-stone-50 px-6 py-3 rounded-2xl font-medium transition-all duration-200 backdrop-blur-sm;
+    box-shadow: 0 4px 16px rgba(120, 113, 108, 0.3);
   }
   
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+    @apply bg-stone-100/80 hover:bg-stone-200/90 text-stone-700 px-6 py-3 rounded-2xl font-medium transition-all duration-200 backdrop-blur-sm border border-stone-300/50;
+    box-shadow: 0 2px 8px rgba(120, 113, 108, 0.08);
   }
 }

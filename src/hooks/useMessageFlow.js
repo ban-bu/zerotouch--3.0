@@ -362,6 +362,14 @@ export const useMessageFlow = (currentScenario) => {
   const confirmSendResponse = useCallback(async (finalResponse) => {
     if (llmProcessing) return
 
+    // 首先添加用户的最终响应消息到方案端
+    const userFinalMessage = {
+      type: 'user',
+      text: finalResponse,
+      timestamp: new Date().toISOString()
+    }
+    addMessage('solution', userFinalMessage)
+
     setLlmProcessing(true)
 
     try {
@@ -374,7 +382,8 @@ export const useMessageFlow = (currentScenario) => {
         // 方案端的所有消息：AI转译的请求 + 企业用户输入 + AI回复
         ...messages.solution
           .filter(msg => msg.type === 'llm_request' || msg.type === 'user' || msg.type === 'ai_response')
-          .map(msg => ({ ...msg, panel: 'solution' }))
+          .map(msg => ({ ...msg, panel: 'solution' })),
+        userFinalMessage // 包含用户的最终响应
       ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
 
       // 处理最终响应

@@ -54,9 +54,9 @@ const ProblemPanel = ({ scenario, messages, onSendMessage, isProcessing }) => {
 
   return (
     <>
-      <div className="panel-header">
+      <div className="panel-header glass-effect" style={{background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.12) 100%)', backdropFilter: 'blur(20px) saturate(1.3)', borderRadius: '20px 20px 0 0', border: '1px solid rgba(255, 255, 255, 0.2)', borderBottom: '1px solid rgba(255, 255, 255, 0.1)'}}>
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+          <div className="p-2 bg-blue-100/70 dark:bg-blue-900/50 rounded-2xl backdrop-blur-sm">
             <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
@@ -76,7 +76,9 @@ const ProblemPanel = ({ scenario, messages, onSendMessage, isProcessing }) => {
       <div className="flex-1 overflow-y-auto space-y-3 mb-4">
         {(!messages || messages.length === 0) && (
           <div className="text-center text-gray-500 py-8">
-            <User className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+            <div className="p-4 bg-gradient-to-r from-blue-100/80 to-sky-100/80 dark:from-blue-900/30 dark:to-sky-900/30 rounded-full shadow-inner backdrop-blur-sm mx-auto mb-3 w-fit">
+              <User className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+            </div>
             <p className="text-sm">在这里输入您的需求或问题</p>
             <p className="text-xs text-gray-400 mt-1">
               支持文本和图片输入
@@ -148,7 +150,7 @@ const ProblemPanel = ({ scenario, messages, onSendMessage, isProcessing }) => {
       </div>
 
       {/* Input Area */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+      <div className="p-4 border-t border-white/20 dark:border-white/10 glass-effect rounded-b-2xl">
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="flex space-x-3">
             <div className="flex-1">
@@ -189,7 +191,7 @@ const ProblemPanel = ({ scenario, messages, onSendMessage, isProcessing }) => {
               )}
             </div>
             
-            <div className="flex flex-col space-y-2">
+            <div className="flex items-end space-x-2">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -198,13 +200,14 @@ const ProblemPanel = ({ scenario, messages, onSendMessage, isProcessing }) => {
                 className="hidden"
                 id="image-upload"
               />
-              <label
+              {/* 隐藏图片上传功能 */}
+              {/* <label
                 htmlFor="image-upload"
                 className="btn-ghost p-3 transition-all duration-200 hover:scale-105 cursor-pointer"
                 title="上传图片"
               >
                 <ImageIcon className="w-5 h-5" />
-              </label>
+              </label> */}
               
               <button
                 type="submit"
