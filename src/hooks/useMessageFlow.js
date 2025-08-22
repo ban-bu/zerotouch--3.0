@@ -266,7 +266,9 @@ export const useMessageFlow = (currentScenario) => {
       const suggestionMessage = {
         type: 'suggestion',
         text: llmResult.suggestionMessage,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        id: `suggestion_${Date.now()}`,
+        feedbackGiven: false
       }
       addMessage('solution', suggestionMessage)
 
@@ -525,6 +527,123 @@ export const useMessageFlow = (currentScenario) => {
     setCurrentNeedsAnalysis(null)
   }, [])
 
+  // 新增：接受建议
+  const acceptSuggestion = useCallback((suggestionId) => {
+    setMessages(prev => ({
+      ...prev,
+      solution: prev.solution.map(msg => 
+        msg.id === suggestionId 
+          ? { ...msg, feedbackGiven: true, accepted: true }
+          : msg
+      )
+    }))
+  }, [])
+
+  // 新增：与AI协商建议
+  const negotiateSuggestion = useCallback((suggestionId) => {
+    // 标记建议进入协商模式
+    setMessages(prev => ({
+      ...prev,
+      solution: prev.solution.map(msg => 
+        msg.id === suggestionId 
+          ? { ...msg, negotiating: true }
+          : msg
+      )
+    }))
+  }, [])
+
+  // 新增：取消协商模式
+  const cancelNegotiation = useCallback((suggestionId) => {
+    setMessages(prev => ({
+      ...prev,
+      solution: prev.solution.map(msg => 
+        msg.id === suggestionId 
+          ? { ...msg, negotiating: false }
+          : msg
+      )
+    }))
+  }, [])
+
+  // 新增：发送协商请求
+  const sendNegotiationRequest = useCallback(async (suggestionId, negotiationText) => {
+    if (!negotiationText.trim()) return
+
+    try {
+      // 获取原始建议
+      const originalSuggestion = messages.solution.find(msg => msg.id === suggestionId)
+      if (!originalSuggestion) return
+
+      // 构建协商上下文
+      const chatHistory = [
+        ...messages.problem
+          .filter(msg => msg.type === 'user' || msg.type === 'ai_response')
+          .map(msg => ({ ...msg, panel: 'problem' })),
+        ...messages.solution
+          .filter(msg => msg.type === 'llm_request' || msg.type === 'user' || msg.type === 'ai_response')
+          .map(msg => ({ ...msg, panel: 'solution' }))
+      ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+
+      // 生成协商后的建议
+      const llmResult = await processWithLLM({
+        type: 'negotiate_suggestion',
+        content: {
+          originalSuggestion: originalSuggestion.text,
+          negotiationRequest: negotiationText
+        },
+        scenario: currentScenario,
+        chatHistory: chatHistory
+      })
+
+      // 添加LLM处理过程到中介面板
+      const llmMessage = {
+        type: 'processing',
+        title: '协商修改建议',
+        steps: llmResult.steps,
+        output: llmResult.suggestionMessage,
+        timestamp: new Date().toISOString()
+      }
+      addMessage('llm', llmMessage)
+
+      // 更新原建议为协商后的版本
+      setMessages(prev => ({
+        ...prev,
+        solution: prev.solution.map(msg => 
+          msg.id === suggestionId 
+            ? { 
+                ...msg, 
+                text: llmResult.suggestionMessage,
+                negotiating: false,
+                negotiated: true,
+                originalText: originalSuggestion.text,
+                negotiationRequest: negotiationText
+              }
+            : msg
+        )
+      }))
+
+    } catch (error) {
+      console.error('协商建议错误:', error)
+      // 协商失败，退出协商模式
+      cancelNegotiation(suggestionId)
+    }
+  }, [messages.problem, messages.solution, currentScenario, addMessage, cancelNegotiation])
+
+  // 新增：拒绝建议并重新生成
+  const rejectSuggestion = useCallback(async (suggestionId) => {
+    // 标记建议为已拒绝
+    setMessages(prev => ({
+      ...prev,
+      solution: prev.solution.map(msg => 
+        msg.id === suggestionId 
+          ? { ...msg, feedbackGiven: true, accepted: false }
+          : msg
+      )
+    }))
+
+    // 重新生成建议
+    await generateSuggestion()
+  }, [generateSuggestion])
+
   // 新增：清空所有状态
   const clearAllStates = useCallback(() => {
     setMessages({
@@ -552,6 +671,12 @@ export const useMessageFlow = (currentScenario) => {
     toggleMissingInfoOption,
     generateFollowUpBySelectedInfo,
     skipInfoCollection,
+    // 建议反馈相关方法
+    acceptSuggestion,
+    negotiateSuggestion,
+    cancelNegotiation,
+    sendNegotiationRequest,
+    rejectSuggestion,
     // 原有方法
     sendProblemMessage,
     sendSolutionMessage,

@@ -105,7 +105,7 @@ const ProblemPanel = ({ scenario, messages, onSendMessage, isProcessing }) => {
                     <div className="flex-1">
                       {/* [MODIFIED] 为单条长消息提供滚动容器 */}
                       <div className="message-content">
-                        <p className="whitespace-pre-wrap">{message.text}</p>
+                        <p className="whitespace-pre-wrap select-text">{message.text}</p>
                       </div>
                       <div className="text-xs text-blue-100 mt-1 opacity-75">
                         {new Date(message.timestamp).toLocaleTimeString()}
@@ -124,8 +124,8 @@ const ProblemPanel = ({ scenario, messages, onSendMessage, isProcessing }) => {
                     <div className="flex-1">
                       {/* [MODIFIED] 为单条长消息提供滚动容器 */}
                       <div className="message-content">
-                        <p className="whitespace-pre-wrap">{message.text}</p>
-                      </div>
+                <p className="whitespace-pre-wrap select-text">{message.text}</p>
+              </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {new Date(message.timestamp).toLocaleTimeString()}
                       </div>

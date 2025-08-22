@@ -75,6 +75,12 @@ function App() {
     toggleMissingInfoOption,
     generateFollowUpBySelectedInfo,
     skipInfoCollection,
+    // 建议反馈相关方法
+    acceptSuggestion,
+    negotiateSuggestion,
+    cancelNegotiation,
+    sendNegotiationRequest,
+    rejectSuggestion,
     // 原有方法
     sendProblemMessage,
     sendSolutionMessage,
@@ -350,6 +356,12 @@ function App() {
                   onToggleMissingInfoOption={toggleMissingInfoOption}
                   onGenerateFollowUpBySelectedInfo={generateFollowUpBySelectedInfo}
                   onSkipInfoCollection={skipInfoCollection}
+                  // 新增：建议反馈相关props
+                  onAcceptSuggestion={acceptSuggestion}
+                  onNegotiateSuggestion={negotiateSuggestion}
+                  onCancelNegotiation={cancelNegotiation}
+                  onSendNegotiationRequest={sendNegotiationRequest}
+                  onRejectSuggestion={rejectSuggestion}
                 />
               </div>
             </AnimatedTransition>

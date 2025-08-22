@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Send, Users, User, Bot, FileText, Lightbulb, MessageSquare, CheckCircle, XCircle, AlertCircle, ArrowRight, Check } from 'lucide-react'
+import { Send, Users, User, Bot, FileText, Lightbulb, MessageSquare, CheckCircle, XCircle, AlertCircle, ArrowRight, Check, MessageCircle } from 'lucide-react'
 import AnimatedTransition from './AnimatedTransition'
 
 const SolutionPanel = ({ 
@@ -19,9 +19,70 @@ const SolutionPanel = ({
   showMissingInfoPanel,
   onToggleMissingInfoOption,
   onGenerateFollowUpBySelectedInfo,
-  onSkipInfoCollection
+  onSkipInfoCollection,
+  // 新增：建议反馈相关props
+  onAcceptSuggestion,
+  onRejectSuggestion,
+  onNegotiateSuggestion,
+  onCancelNegotiation,
+  onSendNegotiationRequest
 }) => {
   const [input, setInput] = useState('')
+
+  // 协商面板组件
+  const NegotiationPanel = ({ messageId, onSendNegotiation, onCancel }) => {
+    const [negotiationText, setNegotiationText] = useState('')
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const handleSendNegotiation = async () => {
+      if (!negotiationText.trim() || isSubmitting) return
+      
+      setIsSubmitting(true)
+      try {
+        await onSendNegotiation(messageId, negotiationText)
+        setNegotiationText('')
+      } catch (error) {
+        console.error('发送协商请求失败:', error)
+      } finally {
+        setIsSubmitting(false)
+      }
+    }
+
+    return (
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+        <div className="flex items-center space-x-2 mb-2">
+          <MessageCircle className="w-4 h-4 text-blue-600" />
+          <span className="text-sm font-medium text-blue-800 dark:text-blue-200">协商模式</span>
+        </div>
+        <div className="space-y-2">
+          <textarea
+            value={negotiationText}
+            onChange={(e) => setNegotiationText(e.target.value)}
+            placeholder="请描述您希望如何修改这个建议..."
+            className="w-full p-2 text-sm border border-blue-200 dark:border-blue-700 rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-900/30 dark:text-blue-100"
+            rows={3}
+            disabled={isSubmitting}
+          />
+          <div className="flex space-x-2">
+            <button
+              className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleSendNegotiation}
+              disabled={!negotiationText.trim() || isSubmitting}
+            >
+              {isSubmitting ? '发送中...' : '发送协商'}
+            </button>
+            <button
+              className="px-3 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors text-sm"
+              onClick={() => onCancel(messageId)}
+              disabled={isSubmitting}
+            >
+              取消
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
   const [finalResponse, setFinalResponse] = useState('')
   const messagesEndRef = useRef(null)
 
@@ -161,7 +222,7 @@ const SolutionPanel = ({
                       )}
                       {/* 需求转译内容 */}
                       <div className="message-content">
-                        <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">{message.text}</p>
+                        <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 select-text">{message.text}</p>
                       </div>
                       {/* 缺失信息提示 */}
                       {message.missingInfoOptions && message.missingInfoOptions.length > 0 && (
@@ -198,7 +259,7 @@ const SolutionPanel = ({
                     <div className="flex-1">
                       {/* [MODIFIED] 单条消息滚动容器 */}
                       <div className="message-content">
-                        <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">{message.text}</p>
+                        <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 select-text">{message.text}</p>
                       </div>
                       <div className="text-xs text-green-700 mt-1 opacity-75">
                         {new Date(message.timestamp).toLocaleTimeString()}
@@ -218,7 +279,7 @@ const SolutionPanel = ({
                       </div>
                       {/* [MODIFIED] 单条消息滚动容器 */}
                       <div className="message-content">
-                        <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">{message.text}</p>
+                        <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 select-text">{message.text}</p>
                       </div>
                       <div className="text-xs text-gray-500 mt-1">
                         {new Date(message.timestamp).toLocaleTimeString()}
@@ -237,10 +298,74 @@ const SolutionPanel = ({
                       <div className="text-xs font-medium text-purple-700 mb-1">
                         AI生成的建议
                       </div>
-                      {/* [MODIFIED] 单条消息滚动容器 */}
-                      <div className="message-content">
-                        <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">{message.text}</p>
+                      {/* [MODIFIED] 单条消息滚动容器 - 添加点击事件 */}
+                      <div 
+                        className="message-content cursor-pointer hover:bg-purple-100 rounded p-2 transition-colors"
+                        onClick={() => setInput(message.text)}
+                        title="点击填入输入框"
+                      >
+                        <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 select-text">{message.text}</p>
                       </div>
+                      
+                      {/* 建议反馈按钮 */}
+              <div className="mt-3">
+                {message.feedbackGiven ? (
+                  <div className={`text-sm px-3 py-1 rounded ${
+                    message.accepted 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                      : 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+                  }`}>
+                    {message.accepted ? '✓ 已接受建议' : '↻ 已拒绝，重新生成中...'}
+                  </div>
+                ) : message.negotiating ? (
+                   <NegotiationPanel 
+                     messageId={message.id}
+                     onSendNegotiation={onSendNegotiationRequest}
+                     onCancel={onCancelNegotiation}
+                   />
+                 ) : message.negotiated ? (
+                   <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-2">
+                     <div className="text-sm text-blue-800 dark:text-blue-200">
+                       ✓ 已协商修改
+                       <details className="mt-1">
+                         <summary className="cursor-pointer text-xs text-blue-600 hover:text-blue-800">查看协商详情</summary>
+                         <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                           <div><strong>原始建议:</strong> {message.originalText}</div>
+                           <div className="mt-1"><strong>协商要求:</strong> {message.negotiationRequest}</div>
+                         </div>
+                       </details>
+                     </div>
+                   </div>
+                ) : (
+                   <div className="flex space-x-2">
+                     <button
+                       onClick={() => onAcceptSuggestion && onAcceptSuggestion(message.id)}
+                       className="flex-1 px-3 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors flex items-center justify-center space-x-1 text-sm"
+                       title="接受这个建议"
+                     >
+                       <CheckCircle className="w-4 h-4" />
+                       <span>接受建议</span>
+                     </button>
+                     <button
+                       onClick={() => onNegotiateSuggestion && onNegotiateSuggestion(message.id)}
+                       className="flex-1 px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors flex items-center justify-center space-x-1 text-sm"
+                       title="与AI协商修改建议"
+                     >
+                       <MessageCircle className="w-4 h-4" />
+                       <span>协商</span>
+                     </button>
+                     <button
+                       onClick={() => onRejectSuggestion && onRejectSuggestion(message.id)}
+                       className="flex-1 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors flex items-center justify-center space-x-1 text-sm"
+                       title="要求重新生成"
+                     >
+                       <XCircle className="w-4 h-4" />
+                       <span>重新生成</span>
+                     </button>
+                   </div>
+                 )}
+              </div>
+                      
                       <div className="text-xs text-purple-600 mt-1 opacity-75">
                         {new Date(message.timestamp).toLocaleTimeString()}
                       </div>
@@ -264,9 +389,13 @@ const SolutionPanel = ({
                       <div className="text-xs font-medium text-orange-700 mb-1">
                         AI生成的追问
                       </div>
-                      {/* [MODIFIED] 单条消息滚动容器 */}
-                      <div className="message-content">
-                        <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">{message.text}</p>
+                      {/* [MODIFIED] 单条消息滚动容器 - 添加点击事件 */}
+                      <div 
+                        className="message-content cursor-pointer hover:bg-orange-100 rounded p-2 transition-colors"
+                        onClick={() => setInput(message.text)}
+                        title="点击填入输入框"
+                      >
+                        <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 select-text">{message.text}</p>
                       </div>
                       <div className="text-xs text-orange-600 mt-1 opacity-75">
                         {new Date(message.timestamp).toLocaleTimeString()}

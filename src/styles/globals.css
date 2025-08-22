@@ -441,6 +441,10 @@ body {
   line-height: 1.6;
   resize: none;
   text-shadow: none;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 .input-field::placeholder {

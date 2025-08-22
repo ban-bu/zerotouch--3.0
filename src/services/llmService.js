@@ -664,11 +664,11 @@ const generateEnterpriseSuggestion = async (content, scenario, chatHistory = [])
     const comprehensivePrompt = [
       {
         role: 'system',
-        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n重要要求：回答必须简洁明了，总字数不超过50个字，直接给出最核心的建议。`
+        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n重要要求：提供详细完整的专业建议，包含具体实施步骤和关键要点，确保内容完整性和实用性。`
       },
       {
         role: 'user',
-        content: `当前对话内容："${content}"${chatContext}\n\n请为企业提供一个简洁的专业建议（不超过50字）。`
+        content: `当前对话内容："${content}"${chatContext}\n\n请为企业提供一个详细的专业建议，包含具体的实施步骤和建议要点。建议应该完整、实用，长度在100-300字之间。`
       }
     ]
     
@@ -765,11 +765,11 @@ const generateEnterpriseFollowUp = async (content, scenario, chatHistory = []) =
     const comprehensivePrompt = [
       {
         role: 'system',
-        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n重要要求：生成的追问必须简洁自然，总字数不超过50个字，直接询问最关键的信息。`
+        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n重要要求：生成的追问必须简洁自然，长度在30-80字之间，直接询问最关键的信息，确保问题具体明确。`
       },
       {
         role: 'user',
-        content: `当前对话内容："${content}"${chatContext}\n\n请生成一个简洁的追问（不超过50字），了解关键信息。`
+        content: `当前对话内容："${content}"${chatContext}\n\n请生成一个简洁明确的追问（30-80字），深入了解关键信息。`
       }
     ]
     
@@ -1034,6 +1034,64 @@ ${prompt.instruction}
   }
 }
 
+// 协商建议处理函数
+const negotiateSuggestion = async (content, scenario, chatHistory = []) => {
+  try {
+    console.log('\n=== 开始协商建议处理 ===')
+    console.log('原始建议:', content.originalSuggestion)
+    console.log('协商请求:', content.negotiationRequest)
+    console.log('场景:', scenario)
+
+    const chatContext = buildChatContextWithLogging(chatHistory, '协商上下文', 4)
+
+    const systemPrompt = `你是一个专业的${scenario}顾问，正在根据客户的协商请求优化之前的建议。
+
+请根据客户的协商要求，对原始建议进行修改和优化。
+
+输出要求：
+1. 必须包含【处理步骤】部分，详细说明协商处理过程
+2. 必须包含【优化建议】部分，提供修改后的完整建议
+3. 建议要具体、可操作、符合客户的协商要求
+4. 保持专业性和实用性`
+
+    const userPrompt = `原始建议：
+${content.originalSuggestion}
+
+客户协商请求：
+${content.negotiationRequest}
+
+请根据客户的协商要求，优化上述建议。${chatContext}`
+
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ]
+
+    console.log('发送协商请求到LLM...')
+    const response = await callModelScopeAPI(messages, 0.7)
+    console.log('LLM协商响应:', truncateForLog(response))
+
+    const sanitized = sanitizeOutput(response)
+    const sections = parseSectionsRobust(sanitized)
+
+    const steps = sections['处理步骤'] || ['正在分析协商请求...', '优化原始建议...', '生成协商后建议...']
+    const suggestionMessage = sections['优化建议'] || sanitized
+
+    console.log('协商处理完成')
+    console.log('处理步骤:', steps)
+    console.log('优化建议:', truncateForLog(suggestionMessage))
+
+    return {
+      steps,
+      suggestionMessage
+    }
+
+  } catch (error) {
+    console.error('协商建议处理错误:', error)
+    throw error
+  }
+}
+
 // 基于选中的信息生成追问
 const generateQuestionsBySelectedInfo = async (originalContent, selectedInfoItems, scenario, chatHistory = []) => {
   try {
@@ -1114,6 +1172,8 @@ export const processWithLLM = async ({ type, content, image, context, scenario, 
       return await generateEnterpriseSuggestion(content, scenario, chatHistory)
     } else if (type === 'generate_followup') {
       return await generateEnterpriseFollowUp(content, scenario, chatHistory)
+    } else if (type === 'negotiate_suggestion') {
+      return await negotiateSuggestion(content, scenario, chatHistory)
     }
     
     throw new Error('未知的处理类型')
@@ -1132,5 +1192,6 @@ export {
   translateToSolution,
   optimizeForUser,
   generateEnterpriseSuggestion,
-  generateEnterpriseFollowUp
+  generateEnterpriseFollowUp,
+  negotiateSuggestion
 }
