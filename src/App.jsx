@@ -48,7 +48,7 @@ function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
   const [settings, setSettings] = useState({
-    darkMode: window.matchMedia('(prefers-color-scheme: dark)').matches,
+    darkMode: true,
     fontSize: 'medium',
     soundEnabled: true,
     autoScroll: true,
@@ -221,19 +221,17 @@ function App() {
           <div className="absolute bottom-1/4 left-1/4 w-56 h-56 bg-gradient-to-r from-purple-400/8 to-pink-500/8 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '4s' }}></div>
         </div>
         {/* Header */}
-        <header className="glass-effect shadow-lg border-b border-white/20 backdrop-blur-md" style={{zIndex: 100, position: 'relative'}}>
+        <header className="app-toolbar">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-4">
-                <h1 className="text-2xl font-bold" style={{
-                  color: settings.darkMode ? '#f8fafc' : '#1f2937',
-                  textShadow: settings.darkMode ? '0 1px 2px rgba(0, 0, 0, 0.5)' : '0 1px 2px rgba(255, 255, 255, 0.8)'
+                <h1 className="text-2xl font-bold text-white drop-shadow" style={{
+                  textShadow: settings.darkMode ? '0 1px 2px rgba(0, 0, 0, 0.5)' : '0 1px 2px rgba(0, 0, 0, 0.25)'
                 }}>
                   GenAI ZeroTouch Services
                 </h1>
-                <span className="text-sm" style={{
-                  color: settings.darkMode ? '#9ca3af' : '#6b7280',
-                  textShadow: settings.darkMode ? '0 1px 2px rgba(0, 0, 0, 0.3)' : '0 1px 2px rgba(255, 255, 255, 0.5)'
+                <span className="text-sm text-gray-200" style={{
+                  textShadow: settings.darkMode ? '0 1px 2px rgba(0, 0, 0, 0.3)' : '0 1px 2px rgba(0, 0, 0, 0.15)'
                 }}>
                   零摩擦沟通系统
                 </span>
@@ -252,7 +250,7 @@ function App() {
                   
                   <button 
                     onClick={handleToggleSettings}
-                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="p-2 rounded-lg transition-colors border border-white/20 hover:bg-white/20 text-white"
                     title="设置 (Ctrl+,)"
                   >
                     <Settings className="w-5 h-5" />
@@ -351,7 +349,7 @@ function App() {
           <div className="text-center">
             <button
               onClick={clearMessages}
-              className="btn-secondary"
+              className="btn-glass px-6 py-3"
             >
               清空对话
             </button>

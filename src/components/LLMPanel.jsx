@@ -47,7 +47,7 @@ const LLMPanel = ({ processing, messages }) => {
   return (
     <>
       {/* Header */}
-      <div className="p-4 border-b border-white/20 dark:border-white/10 glass-effect rounded-t-2xl" style={{background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, rgba(99, 102, 241, 0.12) 100%)', backdropFilter: 'blur(20px) saturate(1.3)'}}>
+      <div className="panel-header">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-gradient-to-br from-purple-500/90 to-indigo-600/90 rounded-2xl backdrop-blur-sm">
             <Bot className="w-5 h-5 text-white" />

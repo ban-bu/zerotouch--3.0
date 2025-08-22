@@ -130,7 +130,7 @@ const SolutionPanel = ({
 
   return (
     <>
-      <div className="p-4 border-b border-white/20 dark:border-white/10 glass-effect rounded-t-2xl" style={{background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(16, 185, 129, 0.12) 100%)', backdropFilter: 'blur(20px) saturate(1.3)'}}>
+      <div className="panel-header">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-green-100/70 dark:bg-emerald-900/50 rounded-2xl backdrop-blur-sm">
@@ -195,7 +195,7 @@ const SolutionPanel = ({
           >
             <div className="space-y-2">
               {message.type === 'llm_request' && (
-                <div className="message-bubble text-blue-900 shadow-sm hover:shadow-md transition-all duration-200" style={{
+                <div className="message-bubble text-white shadow-sm hover:shadow-md transition-all duration-200" style={{
                   background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(147, 197, 253, 0.06) 100%)',
                   backdropFilter: 'blur(20px) saturate(1.3)',
                   WebkitBackdropFilter: 'blur(20px) saturate(1.3)',
@@ -203,14 +203,14 @@ const SolutionPanel = ({
                   borderRadius: '12px'
                 }}>
                   <div className="flex items-start space-x-2">
-                    <Bot className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <Bot className="w-4 h-4 text-white mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <div className="text-xs font-medium text-blue-700 mb-1">
+                      <div className="text-xs font-semibold text-white mb-1" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
                         来自LLM的智能分析需求
                       </div>
                       {/* 需求理解 */}
                       {message.needsAnalysis && (
-                        <div className="mb-2 p-2 rounded text-sm" style={{
+                        <div className="mb-2 p-2 rounded text-sm text-gray-100" style={{
                           background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(147, 197, 253, 0.08) 100%)',
                           backdropFilter: 'blur(10px) saturate(1.2)',
                           WebkitBackdropFilter: 'blur(10px) saturate(1.2)',
@@ -222,7 +222,7 @@ const SolutionPanel = ({
                       )}
                       {/* 需求转译内容 */}
                       <div className="message-content">
-                        <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 select-text">{message.text}</p>
+                        <p className="whitespace-pre-wrap text-white select-text">{message.text}</p>
                       </div>
                       {/* 缺失信息提示 */}
                       {message.missingInfoOptions && message.missingInfoOptions.length > 0 && (
@@ -238,7 +238,7 @@ const SolutionPanel = ({
                           </div>
                         </div>
                       )}
-                      <div className="text-xs text-blue-600 mt-1 opacity-75">
+                      <div className="text-xs text-gray-300 mt-1 opacity-80">
                         {new Date(message.timestamp).toLocaleTimeString()}
                       </div>
                     </div>
@@ -291,7 +291,7 @@ const SolutionPanel = ({
 
               {/* 新增：建议消息 */}
               {message.type === 'suggestion' && (
-                <div className="message-bubble text-purple-900 shadow-sm hover:shadow-md transition-all duration-200" style={{
+                <div className="message-bubble text-white shadow-sm hover:shadow-md transition-all duration-200" style={{
                   background: 'linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(221,214,254,0.06) 100%)',
                   backdropFilter: 'blur(14px) saturate(1.2)',
                   WebkitBackdropFilter: 'blur(14px) saturate(1.2)',
@@ -301,7 +301,7 @@ const SolutionPanel = ({
                   <div className="flex items-start space-x-2">
                     <Lightbulb className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <div className="text-xs font-medium text-purple-700 mb-1">
+                      <div className="text-xs font-semibold text-white mb-1" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
                         AI生成的建议
                       </div>
                       {/* [MODIFIED] 单条消息滚动容器 - 添加点击事件 */}
@@ -316,7 +316,7 @@ const SolutionPanel = ({
                           overflowY: 'visible'
                         }}
                       >
-                        <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 select-text">{message.text}</p>
+                        <p className="whitespace-pre-wrap text-white select-text">{message.text}</p>
                       </div>
                       
                       {/* 建议反馈按钮 */}
@@ -396,7 +396,7 @@ const SolutionPanel = ({
                  )}
               </div>
                       
-                      <div className="text-xs text-purple-600 mt-1 opacity-75">
+                      <div className="text-xs text-white mt-1 opacity-80">
                         {new Date(message.timestamp).toLocaleTimeString()}
                       </div>
                     </div>
@@ -406,7 +406,7 @@ const SolutionPanel = ({
 
               {/* 新增：追问消息 */}
               {message.type === 'followup' && (
-                <div className="message-bubble text-orange-900 shadow-sm hover:shadow-md transition-all duration-200" style={{
+                <div className="message-bubble text-white shadow-sm hover:shadow-md transition-all duration-200" style={{
                   background: 'linear-gradient(135deg, rgba(251, 146, 60, 0.08) 0%, rgba(254, 215, 170, 0.06) 100%)',
                   backdropFilter: 'blur(20px) saturate(1.3)',
                   WebkitBackdropFilter: 'blur(20px) saturate(1.3)',
@@ -416,7 +416,7 @@ const SolutionPanel = ({
                   <div className="flex items-start space-x-2">
                     <MessageSquare className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <div className="text-xs font-medium text-orange-700 mb-1">
+                      <div className="text-xs font-semibold text-white mb-1" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
                         AI生成的追问
                       </div>
                       {/* [MODIFIED] 单条消息滚动容器 - 添加点击事件 */}
@@ -425,9 +425,9 @@ const SolutionPanel = ({
                         onClick={() => setInput(message.text)}
                         title="点击填入输入框"
                       >
-                        <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 select-text">{message.text}</p>
+                        <p className="whitespace-pre-wrap text-white select-text">{message.text}</p>
                       </div>
-                      <div className="text-xs text-orange-600 mt-1 opacity-75">
+                      <div className="text-xs text-white mt-1 opacity-80">
                         {new Date(message.timestamp).toLocaleTimeString()}
                       </div>
                     </div>
@@ -651,13 +651,7 @@ const SolutionPanel = ({
                 type="button"
                 onClick={onGenerateSuggestion}
                 disabled={iterationProcessing || !messages || messages.length === 0}
-                className="flex-1 px-3 py-2 text-white rounded-2xl transition-all hover:scale-105 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-sm"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.35) 0%, rgba(99, 102, 241, 0.32) 100%)',
-                  backdropFilter: 'blur(14px) saturate(1.2)',
-                  WebkitBackdropFilter: 'blur(14px) saturate(1.2)',
-                  border: '1px solid rgba(255, 255, 255, 0.18)'
-                }}
+                className="btn-glass flex-1 px-3 py-2 rounded-2xl transition-all hover:scale-105 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 title="AI生成建议"
               >
                 {iterationProcessing ? (
@@ -668,7 +662,7 @@ const SolutionPanel = ({
                 ) : (
                   <>
                     <Lightbulb className="w-4 h-4 text-white" />
-                    <span className="font-semibold text-sm" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.35)' }}>生成相应建议</span>
+                    <span className="font-semibold text-sm">生成相应建议</span>
                   </>
                 )}
               </button>
@@ -677,13 +671,7 @@ const SolutionPanel = ({
                 type="button"
                 onClick={onGenerateFollowUp}
                 disabled={iterationProcessing || !messages || messages.length === 0}
-                className="flex-1 px-3 py-2 text-white rounded-2xl transition-all hover:scale-105 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-sm"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(251, 146, 60, 0.35) 0%, rgba(245, 158, 11, 0.32) 100%)',
-                  backdropFilter: 'blur(14px) saturate(1.2)',
-                  WebkitBackdropFilter: 'blur(14px) saturate(1.2)',
-                  border: '1px solid rgba(255, 255, 255, 0.18)'
-                }}
+                className="btn-glass flex-1 px-3 py-2 rounded-2xl transition-all hover:scale-105 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 title="AI生成追问"
               >
                 {iterationProcessing ? (
@@ -694,7 +682,7 @@ const SolutionPanel = ({
                 ) : (
                   <>
                     <MessageSquare className="w-4 h-4 text-white" />
-                    <span className="font-semibold text-sm" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.35)' }}>生成相应追问</span>
+                    <span className="font-semibold text-sm">生成相应追问</span>
                   </>
                 )}
               </button>

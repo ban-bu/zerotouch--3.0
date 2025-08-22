@@ -54,7 +54,7 @@ const ProblemPanel = ({ scenario, messages, onSendMessage, isProcessing }) => {
 
   return (
     <>
-      <div className="panel-header glass-effect" style={{background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.12) 100%)', backdropFilter: 'blur(20px) saturate(1.3)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.2)', borderBottom: '1px solid rgba(255, 255, 255, 0.1)'}}>
+      <div className="panel-header">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-blue-100/70 dark:bg-blue-900/50 rounded-2xl backdrop-blur-sm">
             <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
