@@ -91,7 +91,7 @@ function App() {
       try {
         await realtimeService.connect()
         setIsConnected(true)
-        showSuccess('已连接到服务器', { duration: 3000 })
+        // showSuccess('已连接到服务器', { duration: 3000 })
       } catch (error) {
         console.error('Failed to connect to realtime service:', error)
         showError('连接服务器失败', { duration: 5000 })
@@ -253,7 +253,7 @@ function App() {
                 
                 <div className="flex items-center space-x-2">
                   {/* 连接状态指示器 */}
-                  <ConnectionLoader status={isConnected ? 'connected' : 'disconnected'} />
+                  {isConnected && <ConnectionLoader status="connected" />}
                   
                   <button 
                     onClick={handleToggleSettings}

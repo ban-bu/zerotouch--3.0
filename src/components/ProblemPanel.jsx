@@ -64,12 +64,12 @@ const ProblemPanel = ({ scenario, messages, onSendMessage, isProcessing }) => {
             <p className="text-xs text-gray-600 dark:text-gray-400">{scenario.problemRole}</p>
           </div>
         </div>
-        <button
+        {/* <button
           onClick={insertExample}
           className="btn-ghost text-xs"
         >
           插入示例
-        </button>
+        </button> */}
       </div>
 
       {/* Messages Area */}

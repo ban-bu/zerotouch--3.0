@@ -48,12 +48,12 @@ const SolutionPanel = ({ scenario, messages, onSendMessage, isProcessing }) => {
               <p className="text-sm text-gray-600 dark:text-gray-300">{scenario.solutionRole}</p>
             </div>
           </div>
-          <button
+          {/* <button
             onClick={insertSampleResponse}
             className="text-xs text-green-600 hover:text-green-700 underline"
           >
             插入示例
-          </button>
+          </button> */}
         </div>
       </div>
 

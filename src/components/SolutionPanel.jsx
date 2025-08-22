@@ -80,12 +80,12 @@ const SolutionPanel = ({
               <p className="text-sm text-gray-600 dark:text-gray-300">{scenario.solutionRole}</p>
             </div>
           </div>
-          <button
+          {/* <button
             onClick={insertSampleResponse}
-            className="text-xs text-green-600 hover:text-green-700 underline"
+            className="btn-ghost text-xs"
           >
             插入示例
-          </button>
+          </button> */}
         </div>
       </div>
 
