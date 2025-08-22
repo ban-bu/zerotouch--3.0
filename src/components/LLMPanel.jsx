@@ -64,34 +64,28 @@ const LLMPanel = ({ processing, messages }) => {
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 dark:text-gray-400 space-y-4">
             <AnimatedTransition type="fade" show={true}>
-              <div className="p-4 rounded-full shadow-inner" style={{
-                background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, rgba(99, 102, 241, 0.12) 100%)',
-                backdropFilter: 'blur(20px) saturate(1.3)',
-                WebkitBackdropFilter: 'blur(20px) saturate(1.3)',
-                border: '1px solid rgba(196, 181, 253, 0.3)',
-                boxShadow: '0 4px 16px rgba(139, 92, 246, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
-              }}>
+              <div className="p-4 rounded-full shadow-inner div-with-background">
                 <Sparkles className="w-8 h-8 text-purple-600 dark:text-purple-400" />
               </div>
             </AnimatedTransition>
             <p className="text-lg">LLM中介将在这里处理您的请求</p>
             <div className="grid grid-cols-3 gap-4 mt-4 max-w-md">
               <AnimatedTransition type="slide-up" show={true} delay={100}>
-                <div className="p-4 bg-white/70 dark:bg-gray-800/70 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col items-center text-sm backdrop-blur-sm">
+                <div className="p-4 div-with-background rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 flex flex-col items-center text-sm">
                   <Lightbulb className="w-6 h-6 mb-2 text-amber-500" />
-                  <span>分析需求</span>
+                  <span className="text-gray-800 dark:text-gray-200">分析需求</span>
                 </div>
               </AnimatedTransition>
               <AnimatedTransition type="slide-up" show={true} delay={200}>
-                <div className="p-4 bg-white/70 dark:bg-gray-800/70 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col items-center text-sm backdrop-blur-sm">
+                <div className="p-4 div-with-background rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 flex flex-col items-center text-sm">
                   <Zap className="w-6 h-6 mb-2 text-blue-500" />
-                  <span>生成方案</span>
+                  <span className="text-gray-800 dark:text-gray-200">生成方案</span>
                 </div>
               </AnimatedTransition>
               <AnimatedTransition type="slide-up" show={true} delay={300}>
-                <div className="p-4 bg-white/70 dark:bg-gray-800/70 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col items-center text-sm backdrop-blur-sm">
+                <div className="p-4 div-with-background rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 flex flex-col items-center text-sm">
                   <Layers className="w-6 h-6 mb-2 text-green-500" />
-                  <span>优化结果</span>
+                  <span className="text-gray-800 dark:text-gray-200">优化结果</span>
                 </div>
               </AnimatedTransition>
             </div>
@@ -101,13 +95,7 @@ const LLMPanel = ({ processing, messages }) => {
         {/* 统一的处理状态显示区域 */}
         {(messages.length > 0 || processing) && (
           <AnimatedTransition type="fade" show={true}>
-            <div className="p-4 glass-effect" style={{
-               background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.08) 0%, rgba(99, 102, 241, 0.06) 100%)',
-               backdropFilter: 'blur(20px) saturate(1.3)',
-               WebkitBackdropFilter: 'blur(20px) saturate(1.3)',
-               border: '1px solid rgba(196, 181, 253, 0.2)',
-               borderRadius: '16px'
-             }}>
+            <div className="p-4 glass-effect div-with-background">
               <div className="flex items-center space-x-3">
                 <Bot className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 <div className="flex-1">

@@ -4,59 +4,278 @@
 
 @layer base {
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  
+  /* 玻璃效果样式 */
+  .glass-effect {
+    background: rgba(31, 41, 55, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  .glass-panel {
+    background: rgba(31, 41, 55, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 4px 24px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  /* 幻彩动画效果 */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+  }
+  
+  /* 改进的滚动条样式 */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    transition: background 0.2s ease;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* 通用文本样式 */
+  .text-enhanced {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+    font-weight: 600 !important;
+  }
+  
+  .text-secondary {
+    color: rgba(255, 255, 255, 0.9) !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+    font-weight: 500 !important;
+  }
+  
+  .text-muted {
+    color: rgba(255, 255, 255, 0.8) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+    font-weight: 500 !important;
+  }
+  
+  /* 强制覆盖所有文本元素样式 */
+  h1, h2, h3, h4, h5, h6 {
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.025em !important;
+  }
+  
+  /* 段落文本强制增强 */
+  p {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+    line-height: 1.6 !important;
+    font-weight: 500 !important;
+  }
+  
+  /* span元素强制样式 */
+  span {
+    color: #ffffff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+    font-weight: 500 !important;
+  }
+  
+  /* button元素强制样式 - 与p元素保持一致 */
+  button {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+    line-height: 1.6 !important;
+    font-weight: 500 !important;
+  }
+  
+  /* div元素需要底色的样式类 */
+  .div-with-background {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(147, 51, 234, 0.12) 100%) !important;
+    backdrop-filter: blur(20px) saturate(1.3) !important;
+    border: 1px solid rgba(167, 181, 253, 0.3) !important;
+    border-radius: 16px !important;
+    box-shadow: 
+      0 4px 16px rgba(59, 130, 246, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  }
+  
+  .div-with-background * {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
   }
   
   body {
-    @apply text-gray-700;
-    background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%);
-    color: #374151;
+    @apply text-white;
+    /* Cluely风格幻彩背景 + 雅黑色调 */
+    background: 
+      /* 底部蓝橙紫三级渐变幻彩 */
+      radial-gradient(ellipse at bottom, 
+        rgba(59, 130, 246, 0.3) 0%, 
+        rgba(251, 146, 60, 0.25) 35%, 
+        rgba(147, 51, 234, 0.2) 70%, 
+        transparent 100%
+      ),
+      /* 中层幻彩效果 */
+      radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(251, 146, 60, 0.12) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(147, 51, 234, 0.1) 0%, transparent 50%),
+      /* 雅黑基础渐变 */
+      linear-gradient(135deg, 
+        #1f2937 0%, 
+        #374151 25%, 
+        #4b5563 50%, 
+        #6b7280 75%, 
+        #9ca3af 100%
+      );
+    color: #ffffff;
+    min-height: 100vh;
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer components {
   .panel {
-    @apply bg-stone-50/85 backdrop-blur-sm rounded-3xl shadow-lg border-0 p-6;
-    box-shadow: 0 8px 32px rgba(120, 113, 108, 0.12);
-    border: 1px solid rgba(168, 162, 158, 0.2);
+    /* 雅黑透明面板 */
+    background: rgba(31, 41, 55, 0.85);
+    backdrop-filter: blur(12px);
+    @apply rounded-3xl shadow-2xl border-0 p-6;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
   }
   
   .panel-header {
-    @apply text-lg font-semibold text-stone-700 mb-4 pb-2 border-b border-stone-300/50 bg-stone-50/80 backdrop-blur-sm rounded-t-2xl px-4 py-3;
+    /* 灰白透明功能栏 */
+    background: rgba(249, 250, 251, 0.15);
+    backdrop-filter: blur(8px);
+    @apply text-xl font-bold text-white mb-4 pb-2 border-b border-white/30 rounded-t-2xl px-4 py-3;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    letter-spacing: 0.025em;
   }
   
   .message-bubble {
-    @apply p-4 rounded-2xl mb-3 max-w-full backdrop-blur-sm;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    @apply p-4 rounded-2xl mb-3 max-w-full;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   }
   
   .message-user {
-    @apply bg-stone-600/90 text-stone-50 ml-auto;
+    background: rgba(59, 130, 246, 0.9);
+    @apply text-white ml-auto font-medium;
     border-radius: 20px 20px 6px 20px;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    font-size: 15px;
+    line-height: 1.5;
   }
   
   .message-ai {
-    @apply bg-stone-100/70 text-stone-700 border border-stone-300/50;
+    background: rgba(249, 250, 251, 0.2);
+    @apply text-white border border-white/25 font-medium;
     border-radius: 20px 20px 20px 6px;
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      0 2px 8px rgba(0, 0, 0, 0.1);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    font-size: 15px;
+    line-height: 1.5;
   }
   
   .message-system {
-    @apply bg-amber-50/70 text-amber-800 border border-amber-200/50;
+    background: rgba(251, 146, 60, 0.25);
+    @apply text-orange-100 border border-orange-400/40 font-medium;
     border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(251, 146, 60, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    font-size: 14px;
+    line-height: 1.4;
   }
   
   .input-field {
-    @apply w-full p-3 border border-stone-300/50 rounded-2xl focus:ring-2 focus:ring-stone-400/50 focus:border-stone-400/50 resize-none bg-stone-50/80 backdrop-blur-sm text-stone-700;
-    box-shadow: 0 2px 8px rgba(120, 113, 108, 0.08);
+    background: rgba(249, 250, 251, 0.15);
+    backdrop-filter: blur(8px);
+    @apply w-full p-4 border border-white/25 rounded-2xl focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 resize-none text-white placeholder-gray-300 font-medium;
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transition: all 0.2s ease;
+    font-size: 15px;
+    line-height: 1.5;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  
+  .input-field:focus {
+    background: rgba(249, 250, 251, 0.2);
+    box-shadow: 
+      0 4px 16px rgba(59, 130, 246, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  
+  .input-field::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    text-shadow: none;
   }
   
   .btn-primary {
-    @apply bg-stone-600 hover:bg-stone-700 text-stone-50 px-6 py-3 rounded-2xl font-medium transition-all duration-200 backdrop-blur-sm;
-    box-shadow: 0 4px 16px rgba(120, 113, 108, 0.3);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.9) 0%, rgba(147, 51, 234, 0.9) 100%);
+    backdrop-filter: blur(8px);
+    @apply hover:scale-105 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-200;
+    box-shadow: 
+      0 4px 16px rgba(59, 130, 246, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    font-size: 15px;
+    letter-spacing: 0.025em;
+  }
+  
+  .btn-primary:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 1) 0%, rgba(147, 51, 234, 1) 100%);
+    box-shadow: 
+      0 6px 20px rgba(59, 130, 246, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
   
   .btn-secondary {
-    @apply bg-stone-100/80 hover:bg-stone-200/90 text-stone-700 px-6 py-3 rounded-2xl font-medium transition-all duration-200 backdrop-blur-sm border border-stone-300/50;
-    box-shadow: 0 2px 8px rgba(120, 113, 108, 0.08);
+    background: rgba(249, 250, 251, 0.15);
+    backdrop-filter: blur(8px);
+    @apply hover:bg-white/25 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-200 border border-white/25;
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    font-size: 15px;
+    letter-spacing: 0.025em;
   }
 }

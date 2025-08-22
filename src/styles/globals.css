@@ -275,7 +275,7 @@ body {
 /* Impact: 为过长消息提供纵向滚动条，避免撑高对话布局 */
 /* Backward Compatibility: 仅新增类，不影响现有样式 */
 .message-content {
-  max-height: 240px;
+  max-height: 420px; /* 防止长内容被截断 */
   overflow-y: auto;
   overscroll-behavior: contain;
   padding-right: 2px;
@@ -441,10 +441,30 @@ body {
   line-height: 1.6;
   resize: none;
   text-shadow: none;
-  user-select: text;
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  caret-color: #111827;
+}
+
+/* 明确提升输入框文字的选中可见度（避免误以为无法选中） */
+.input-field::selection {
+  background: rgba(147, 197, 253, 0.45);
+  color: #111827;
+}
+.dark .input-field::selection {
+  background: rgba(59, 130, 246, 0.55);
+  color: #f9fafb;
+}
+/* Firefox 兼容 */
+.input-field::-moz-selection {
+  background: rgba(147, 197, 253, 0.45);
+  color: #111827;
+}
+.dark .input-field::-moz-selection {
+  background: rgba(59, 130, 246, 0.55);
+  color: #f9fafb;
 }
 
 .input-field::placeholder {
@@ -667,7 +687,7 @@ body {
     @apply max-w-full;
   }
   .message-content {
-    max-height: 200px;
+    max-height: 360px;
   }
   
   .panel {

@@ -160,7 +160,7 @@ const ProblemPanel = ({ scenario, messages, onSendMessage, isProcessing }) => {
                 placeholder={`作为${scenario.problemRole}，请描述您的需求...`}
                 className="input-field resize-none transition-all duration-200 focus:shadow-md"
                 rows={3}
-                disabled={isProcessing}
+                readOnly={isProcessing}
               />
               
               {/* Image preview */}

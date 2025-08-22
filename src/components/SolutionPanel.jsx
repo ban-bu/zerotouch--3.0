@@ -133,8 +133,8 @@ const SolutionPanel = ({
       <div className="p-4 border-b border-white/20 dark:border-white/10 glass-effect rounded-t-2xl" style={{background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(16, 185, 129, 0.12) 100%)', backdropFilter: 'blur(20px) saturate(1.3)'}}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-gradient-to-br from-green-500/90 to-emerald-600/90 rounded-2xl backdrop-blur-sm">
-              <Users className="w-5 h-5 text-white" />
+            <div className="p-2 bg-green-100/70 dark:bg-emerald-900/50 rounded-2xl backdrop-blur-sm">
+              <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white">解决方案</h3>
@@ -153,7 +153,13 @@ const SolutionPanel = ({
       {/* 迭代模式提示 */}
       {iterationMode && (
         <AnimatedTransition type="slide-down" show={true}>
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800">
+          <div className="p-3" style={{
+            background: 'linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(147,197,253,0.06) 100%)',
+            backdropFilter: 'blur(14px) saturate(1.2)',
+            WebkitBackdropFilter: 'blur(14px) saturate(1.2)',
+            border: '1px solid rgba(147,197,253,0.25)',
+            borderRadius: '12px'
+          }}>
             <div className="flex items-center space-x-2 text-blue-800 dark:text-blue-200">
               <Lightbulb className="w-4 h-4" />
               <span className="text-sm font-medium">迭代模式 - 请确认最终回复内容</span>
@@ -170,13 +176,7 @@ const SolutionPanel = ({
         {(!messages || messages.length === 0) && (
           <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 dark:text-gray-400 space-y-4">
             <AnimatedTransition type="fade" show={true}>
-              <div className="p-4 rounded-full shadow-inner" style={{
-                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(16, 185, 129, 0.12) 100%)',
-                backdropFilter: 'blur(20px) saturate(1.3)',
-                WebkitBackdropFilter: 'blur(20px) saturate(1.3)',
-                border: '1px solid rgba(167, 243, 208, 0.3)',
-                boxShadow: '0 4px 16px rgba(34, 197, 94, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
-              }}>
+              <div className="p-4 bg-gradient-to-r from-green-100/80 to-emerald-100/80 dark:from-green-900/30 dark:to-emerald-900/30 rounded-full shadow-inner backdrop-blur-sm">
                 <Users className="w-8 h-8 text-green-600 dark:text-green-400" />
               </div>
             </AnimatedTransition>
@@ -291,7 +291,13 @@ const SolutionPanel = ({
 
               {/* 新增：建议消息 */}
               {message.type === 'suggestion' && (
-                <div className="message-bubble bg-purple-50 text-purple-900 border border-purple-200 shadow-sm hover:shadow-md transition-all duration-200">
+                <div className="message-bubble text-purple-900 shadow-sm hover:shadow-md transition-all duration-200" style={{
+                  background: 'linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(221,214,254,0.06) 100%)',
+                  backdropFilter: 'blur(14px) saturate(1.2)',
+                  WebkitBackdropFilter: 'blur(14px) saturate(1.2)',
+                  border: '1px solid rgba(168,85,247,0.25)',
+                  borderRadius: '12px'
+                }}>
                   <div className="flex items-start space-x-2">
                     <Lightbulb className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
@@ -300,9 +306,15 @@ const SolutionPanel = ({
                       </div>
                       {/* [MODIFIED] 单条消息滚动容器 - 添加点击事件 */}
                       <div 
-                        className="message-content cursor-pointer hover:bg-purple-100 rounded p-2 transition-colors"
+                        className="message-content cursor-pointer rounded p-2 transition-colors"
                         onClick={() => setInput(message.text)}
                         title="点击填入输入框"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(168,85,247,0.06) 0%, rgba(221,214,254,0.05) 100%)',
+                          border: '1px solid rgba(168,85,247,0.2)',
+                          maxHeight: 'none',
+                          overflowY: 'visible'
+                        }}
                       >
                         <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 select-text">{message.text}</p>
                       </div>
@@ -340,7 +352,13 @@ const SolutionPanel = ({
                    <div className="flex space-x-2">
                      <button
                        onClick={() => onAcceptSuggestion && onAcceptSuggestion(message.id)}
-                       className="flex-1 px-3 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors flex items-center justify-center space-x-1 text-sm"
+                       className="flex-1 px-3 py-2 text-green-700 rounded-lg transition-colors flex items-center justify-center space-x-1 text-sm"
+                       style={{
+                         background: 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(52,211,153,0.1) 100%)',
+                         backdropFilter: 'blur(8px) saturate(1.2)',
+                         WebkitBackdropFilter: 'blur(8px) saturate(1.2)',
+                         border: '1px solid rgba(16,185,129,0.25)'
+                       }}
                        title="接受这个建议"
                      >
                        <CheckCircle className="w-4 h-4" />
@@ -348,7 +366,13 @@ const SolutionPanel = ({
                      </button>
                      <button
                        onClick={() => onNegotiateSuggestion && onNegotiateSuggestion(message.id)}
-                       className="flex-1 px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors flex items-center justify-center space-x-1 text-sm"
+                       className="flex-1 px-3 py-2 text-blue-700 rounded-lg transition-colors flex items-center justify-center space-x-1 text-sm"
+                       style={{
+                         background: 'linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(147,197,253,0.1) 100%)',
+                         backdropFilter: 'blur(8px) saturate(1.2)',
+                         WebkitBackdropFilter: 'blur(8px) saturate(1.2)',
+                         border: '1px solid rgba(59,130,246,0.25)'
+                       }}
                        title="与AI协商修改建议"
                      >
                        <MessageCircle className="w-4 h-4" />
@@ -356,7 +380,13 @@ const SolutionPanel = ({
                      </button>
                      <button
                        onClick={() => onRejectSuggestion && onRejectSuggestion(message.id)}
-                       className="flex-1 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors flex items-center justify-center space-x-1 text-sm"
+                       className="flex-1 px-3 py-2 text-red-700 rounded-lg transition-colors flex items-center justify-center space-x-1 text-sm"
+                       style={{
+                         background: 'linear-gradient(135deg, rgba(248,113,113,0.12) 0%, rgba(252,165,165,0.1) 100%)',
+                         backdropFilter: 'blur(8px) saturate(1.2)',
+                         WebkitBackdropFilter: 'blur(8px) saturate(1.2)',
+                         border: '1px solid rgba(248,113,113,0.25)'
+                       }}
                        title="要求重新生成"
                      >
                        <XCircle className="w-4 h-4" />
@@ -558,7 +588,7 @@ const SolutionPanel = ({
                 placeholder="编辑最终回复内容..."
                 className="input-field resize-none transition-all duration-200 focus:shadow-md"
                 rows={4}
-                disabled={isProcessing}
+                readOnly={isProcessing}
               />
               
               <div className="flex space-x-2">
@@ -599,7 +629,7 @@ const SolutionPanel = ({
                   placeholder={`作为${scenario.solutionRole}，请提供您的专业建议...`}
                   className="input-field resize-none transition-all duration-200 focus:shadow-md"
                   rows={3}
-                  disabled={isProcessing || iterationProcessing}
+                  readOnly={isProcessing || iterationProcessing}
                 />
               </div>
               
@@ -621,7 +651,13 @@ const SolutionPanel = ({
                 type="button"
                 onClick={onGenerateSuggestion}
                 disabled={iterationProcessing || !messages || messages.length === 0}
-                className="flex-1 px-3 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                className="flex-1 px-3 py-2 text-white rounded-2xl transition-all hover:scale-105 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-sm"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.35) 0%, rgba(99, 102, 241, 0.32) 100%)',
+                  backdropFilter: 'blur(14px) saturate(1.2)',
+                  WebkitBackdropFilter: 'blur(14px) saturate(1.2)',
+                  border: '1px solid rgba(255, 255, 255, 0.18)'
+                }}
                 title="AI生成建议"
               >
                 {iterationProcessing ? (
@@ -631,8 +667,8 @@ const SolutionPanel = ({
                   </>
                 ) : (
                   <>
-                    <Lightbulb className="w-4 h-4" />
-                    <span>生成相应建议</span>
+                    <Lightbulb className="w-4 h-4 text-white" />
+                    <span className="font-semibold text-sm" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.35)' }}>生成相应建议</span>
                   </>
                 )}
               </button>
@@ -641,7 +677,13 @@ const SolutionPanel = ({
                 type="button"
                 onClick={onGenerateFollowUp}
                 disabled={iterationProcessing || !messages || messages.length === 0}
-                className="flex-1 px-3 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                className="flex-1 px-3 py-2 text-white rounded-2xl transition-all hover:scale-105 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-sm"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(251, 146, 60, 0.35) 0%, rgba(245, 158, 11, 0.32) 100%)',
+                  backdropFilter: 'blur(14px) saturate(1.2)',
+                  WebkitBackdropFilter: 'blur(14px) saturate(1.2)',
+                  border: '1px solid rgba(255, 255, 255, 0.18)'
+                }}
                 title="AI生成追问"
               >
                 {iterationProcessing ? (
@@ -651,8 +693,8 @@ const SolutionPanel = ({
                   </>
                 ) : (
                   <>
-                    <MessageSquare className="w-4 h-4" />
-                    <span>生成相应追问</span>
+                    <MessageSquare className="w-4 h-4 text-white" />
+                    <span className="font-semibold text-sm" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.35)' }}>生成相应追问</span>
                   </>
                 )}
               </button>

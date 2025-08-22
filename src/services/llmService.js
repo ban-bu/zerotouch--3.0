@@ -602,7 +602,7 @@ const processSolutionResponse = async (content, scenario, chatHistory = []) => {
   }
 }
 
-// 新增：生成企业端建议
+// 新增：生成企业端建议（限制≤50词）
 const generateEnterpriseSuggestion = async (content, scenario, chatHistory = []) => {
   try {
     const scenarioPrompts = {
@@ -664,19 +664,36 @@ const generateEnterpriseSuggestion = async (content, scenario, chatHistory = [])
     const comprehensivePrompt = [
       {
         role: 'system',
-        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n重要要求：提供详细完整的专业建议，包含具体实施步骤和关键要点，确保内容完整性和实用性。`
+        content: `${prompt.systemRole}\n\n${prompt.context}\n\n${prompt.example}\n\n重要要求：
+1) 只输出一段简洁建议，直达要点；
+2) 绝不超过50个词（中文按词语计，英文按单词计）；
+3) 避免分点、编号、过多铺垫；
+4) 保持可执行与落地性；`
       },
       {
         role: 'user',
-        content: `当前对话内容："${content}"${chatContext}\n\n请为企业提供一个详细的专业建议，包含具体的实施步骤和建议要点。建议应该完整、实用，长度在100-300字之间。`
+        content: `当前对话内容："${content}"${chatContext}\n\n请给出不超过50词的一段建议（不得分点），突出可执行要点。`
       }
     ]
     
     const resultRaw = await callModelScopeAPI(comprehensivePrompt, 0.3)
     const result = sanitizeOutput(resultRaw)
 
-    // 简化处理，直接使用结果
-    const suggestionMessage = result.trim()
+    // 简化处理，并进行硬性裁剪：最多50词
+    const raw = result.trim()
+    const suggestionMessage = (() => {
+      // 以空白切分词（兼容中英混合）。为中文进一步尝试基于标点/空白近似切词
+      const tokens = raw
+        .replace(/\s+/g, ' ')
+        .replace(/[，。；、]/g, ' ')
+        .trim()
+        .split(' ')
+        .filter(Boolean)
+      if (tokens.length <= 50) return raw
+      const clipped = tokens.slice(0, 50).join(' ')
+      // 若被裁剪，补上省略号
+      return clipped + '…'
+    })()
 
     // 构建步骤显示
     const steps = [

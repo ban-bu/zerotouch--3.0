@@ -13,10 +13,10 @@ const ScenarioSelector = ({ scenarios, currentScenario, onScenarioChange }) => {
             key={scenario.id}
             onClick={() => onScenarioChange(scenario.id)}
             className={
-              `flex items-center space-x-2 px-4 py-3 rounded-2xl border transition-all duration-200 backdrop-blur-sm ` +
+              `flex items-center space-x-2 px-4 py-3 rounded-2xl border transition-all duration-200 backdrop-blur-sm div-with-background ` +
               (isActive
                 ? 'bg-blue-500/90 text-white border-blue-500/50 shadow-lg'
-                : 'bg-white/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 border-gray-300/50 dark:border-gray-600/50 hover:bg-white/90 dark:hover:bg-gray-700/90')
+                : 'text-gray-700 dark:text-gray-300 border-gray-300/50 dark:border-gray-600/50 hover:bg-white/90 dark:hover:bg-gray-700/90')
             }
             title={scenario.description}
           >
@@ -24,7 +24,7 @@ const ScenarioSelector = ({ scenarios, currentScenario, onScenarioChange }) => {
               `p-1.5 rounded-xl transition-all duration-200 ` +
               (isActive
                 ? 'bg-gradient-to-br from-blue-400/80 to-purple-500/80 text-white backdrop-blur-sm'
-                : 'bg-gray-100/80 dark:bg-gray-700/80 text-gray-600 dark:text-gray-400 backdrop-blur-sm')
+                : 'div-with-background text-gray-600 dark:text-gray-400')
             }>
               <scenario.icon className="w-4 h-4" />
             </div>
