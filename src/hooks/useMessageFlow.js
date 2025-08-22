@@ -148,6 +148,13 @@ export const useMessageFlow = (currentScenario) => {
     }
     addMessage('solution', userMessage)
 
+    // 隐藏信息选择面板（如果正在显示）
+    if (showMissingInfoPanel) {
+      setShowMissingInfoPanel(false)
+      setMissingInfoOptions([])
+      setCurrentNeedsAnalysis(null)
+    }
+
     // 开始LLM处理
     setLlmProcessing(true)
 
