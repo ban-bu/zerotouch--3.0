@@ -60,7 +60,7 @@ const LLMPanel = ({ processing, messages }) => {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4">
+      <div className="flex-1 overflow-y-hidden space-y-4 mb-4 p-4">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 dark:text-gray-400 space-y-4">
             <AnimatedTransition type="fade" show={true}>
@@ -74,7 +74,7 @@ const LLMPanel = ({ processing, messages }) => {
                 <Sparkles className="w-8 h-8 text-purple-600 dark:text-purple-400" />
               </div>
             </AnimatedTransition>
-            <p className="text-lg">LLM中介将在这里处理您的请求</p>
+            <p className="text-lg">智能AI助手正在待命</p>
             <div className="grid grid-cols-3 gap-4 mt-4 max-w-md">
               <AnimatedTransition type="slide-up" show={true} delay={100}>
                 <div className="p-4 bg-white/70 dark:bg-gray-800/70 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col items-center text-sm backdrop-blur-sm">

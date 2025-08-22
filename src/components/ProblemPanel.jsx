@@ -73,15 +73,15 @@ const ProblemPanel = ({ scenario, messages, onSendMessage, isProcessing }) => {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto space-y-3 mb-4">
+      <div className="flex-1 overflow-y-hidden space-y-3 mb-4 p-4">
         {(!messages || messages.length === 0) && (
-          <div className="text-center text-gray-500 py-8">
+          <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 space-y-4">
             <div className="p-4 bg-gradient-to-r from-blue-100/80 to-sky-100/80 dark:from-blue-900/30 dark:to-sky-900/30 rounded-full shadow-inner backdrop-blur-sm mx-auto mb-3 w-fit">
               <User className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             </div>
-            <p className="text-sm">在这里输入您的需求或问题</p>
-            <p className="text-xs text-gray-400 mt-1">
-              支持文本和图片输入
+            <p className="text-lg">在这里输入您的需求或问题</p>
+            <p className="text-sm text-gray-400 mt-1">
+              支持多种格式输入
             </p>
           </div>
         )}

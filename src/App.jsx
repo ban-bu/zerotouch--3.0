@@ -94,7 +94,8 @@ function App() {
         // showSuccess('已连接到服务器', { duration: 3000 })
       } catch (error) {
         console.error('Failed to connect to realtime service:', error)
-        showError('连接服务器失败', { duration: 5000 })
+        // 隐藏连接失败通知
+        // showError('连接服务器失败', { duration: 5000 })
       }
     }
     
@@ -105,11 +106,12 @@ function App() {
       REALTIME_EVENTS.CONNECTION_STATE_CHANGED,
       (data) => {
         setIsConnected(data.connected)
-        if (data.connected) {
-          showSuccess('已重新连接到服务器', { duration: 3000 })
-        } else {
-          showError('与服务器连接断开', { duration: 5000 })
-        }
+        // 隐藏连接状态通知
+        // if (data.connected) {
+        //   showSuccess('已重新连接到服务器', { duration: 3000 })
+        // } else {
+        //   showError('与服务器连接断开', { duration: 5000 })
+        // }
       }
     )
     
@@ -118,7 +120,8 @@ function App() {
       REALTIME_EVENTS.ERROR,
       (error) => {
         console.error('Realtime service error:', error)
-        showError(`连接错误: ${error.message}`, { duration: 5000 })
+        // 隐藏连接错误通知
+        // showError(`连接错误: ${error.message}`, { duration: 5000 })
       }
     )
     

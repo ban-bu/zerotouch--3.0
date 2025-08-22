@@ -105,7 +105,7 @@ const SolutionPanel = ({
       )}
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto space-y-3 mb-4 p-4">
+      <div className="flex-1 overflow-y-hidden space-y-3 mb-4 p-4">
         {(!messages || messages.length === 0) && (
           <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 dark:text-gray-400 space-y-4">
             <AnimatedTransition type="fade" show={true}>
