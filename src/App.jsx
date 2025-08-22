@@ -252,8 +252,8 @@ function App() {
                 />
                 
                 <div className="flex items-center space-x-2">
-                  {/* 连接状态指示器 */}
-                  {isConnected && <ConnectionLoader status="connected" />}
+                  {/* 连接状态指示器 - 已隐藏 */}
+                  {/* {isConnected && <ConnectionLoader status="connected" />} */}
                   
                   <button 
                     onClick={handleToggleSettings}
