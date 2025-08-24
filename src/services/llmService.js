@@ -1109,6 +1109,90 @@ ${content.negotiationRequest}
   }
 }
 
+// 协商追问处理函数
+const negotiateFollowUp = async (content, scenario, chatHistory = []) => {
+  try {
+    console.log('\n=== 开始协商追问处理 ===')
+    console.log('原始追问:', content.originalFollowUp)
+    console.log('协商请求:', content.negotiationRequest)
+    console.log('场景:', scenario)
+
+    const chatContext = buildChatContextWithLogging(chatHistory, '协商上下文', 4)
+
+    const scenarioPrompts = {
+      retail: {
+        systemRole: '你是一位专业的零售销售顾问，正在根据客户的协商请求优化追问方式。',
+        style: '友好亲切，体现对顾客的关怀和理解，确保追问方式让顾客感到舒适'
+      },
+      enterprise: {
+        systemRole: '你是一位专业的企业服务顾问，正在根据客户的协商请求优化追问方式。',
+        style: '专业高效，体现商业洞察力，确保追问能够获得关键的业务信息'
+      },
+      education: {
+        systemRole: '你是一位专业的教育咨询顾问，正在根据客户的协商请求优化追问方式。',
+        style: '温暖鼓励，启发性强，确保追问能够了解学习需求并给予信心'
+      }
+    }
+
+    const prompt = scenarioPrompts[scenario]
+    if (!prompt) {
+      throw new Error(`不支持的场景类型: ${scenario}`)
+    }
+
+    const systemPrompt = `${prompt.systemRole}
+
+请根据客户的协商要求，对原始追问进行修改和优化。
+
+风格要求：${prompt.style}
+
+输出要求：
+1. 必须包含【处理步骤】部分，详细说明协商处理过程
+2. 必须包含【优化追问】部分，提供修改后的完整追问
+3. 追问要简洁自然，长度在30-80字之间
+4. 追问要体现对客户协商要求的理解和尊重
+5. 保持专业性的同时更贴近客户的沟通偏好`
+
+    const userPrompt = `原始追问：
+${content.originalFollowUp}
+
+客户协商请求：
+${content.negotiationRequest}
+
+请根据客户的协商要求，优化上述追问。${chatContext}`
+
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ]
+
+    console.log('发送追问协商请求到LLM...')
+    const response = await callModelScopeAPI(messages, 0.7)
+    console.log('LLM追问协商响应:', truncateForLog(response))
+
+    const sanitized = sanitizeOutput(response)
+    
+    // 解析结构化输出
+    const stepsMatch = sanitized.match(/【处理步骤】\s*([\s\S]*?)(?=【优化追问】|$)/)
+    const followUpMatch = sanitized.match(/【优化追问】\s*([\s\S]*?)$/)
+    
+    const steps = stepsMatch ? stepsMatch[1].trim().split('\n').filter(line => line.trim()) : ['正在分析协商请求...', '优化原始追问...', '生成协商后追问...']
+    const followUpMessage = followUpMatch ? followUpMatch[1].trim() : sanitized
+
+    console.log('追问协商处理完成')
+    console.log('处理步骤:', steps)
+    console.log('优化追问:', truncateForLog(followUpMessage))
+
+    return {
+      steps,
+      followUpMessage
+    }
+
+  } catch (error) {
+    console.error('协商追问处理错误:', error)
+    throw error
+  }
+}
+
 // 基于选中的信息生成追问
 const generateQuestionsBySelectedInfo = async (originalContent, selectedInfoItems, scenario, chatHistory = []) => {
   try {
@@ -1191,6 +1275,8 @@ export const processWithLLM = async ({ type, content, image, context, scenario, 
       return await generateEnterpriseFollowUp(content, scenario, chatHistory)
     } else if (type === 'negotiate_suggestion') {
       return await negotiateSuggestion(content, scenario, chatHistory)
+    } else if (type === 'negotiate_followup') {
+      return await negotiateFollowUp(content, scenario, chatHistory)
     }
     
     throw new Error('未知的处理类型')
@@ -1210,5 +1296,6 @@ export {
   optimizeForUser,
   generateEnterpriseSuggestion,
   generateEnterpriseFollowUp,
-  negotiateSuggestion
+  negotiateSuggestion,
+  negotiateFollowUp
 }

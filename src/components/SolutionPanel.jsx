@@ -30,7 +30,7 @@ const SolutionPanel = ({
   const [input, setInput] = useState('')
 
   // 协商面板组件
-  const NegotiationPanel = ({ messageId, onSendNegotiation, onCancel }) => {
+  const NegotiationPanel = ({ messageId, messageType, onSendNegotiation, onCancel }) => {
     const [negotiationText, setNegotiationText] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -48,17 +48,25 @@ const SolutionPanel = ({
       }
     }
 
+    const placeholderText = messageType === 'followup' 
+      ? "请描述您希望如何修改这个追问..." 
+      : "请描述您希望如何修改这个建议..."
+
+    const panelTitle = messageType === 'followup' 
+      ? "协商追问" 
+      : "协商建议"
+
     return (
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
         <div className="flex items-center space-x-2 mb-2">
           <MessageCircle className="w-4 h-4 text-blue-600" />
-          <span className="text-sm font-medium text-blue-800 dark:text-blue-200">协商模式</span>
+          <span className="text-sm font-medium text-blue-800 dark:text-blue-200">{panelTitle}</span>
         </div>
         <div className="space-y-2">
           <textarea
             value={negotiationText}
             onChange={(e) => setNegotiationText(e.target.value)}
-            placeholder="请描述您希望如何修改这个建议..."
+            placeholder={placeholderText}
             className="w-full p-2 text-sm border border-blue-200 dark:border-blue-700 rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-900/30 dark:text-blue-100"
             rows={3}
             disabled={isSubmitting}
@@ -332,6 +340,7 @@ const SolutionPanel = ({
                 ) : message.negotiating ? (
                    <NegotiationPanel 
                      messageId={message.id}
+                     messageType={message.type}
                      onSendNegotiation={onSendNegotiationRequest}
                      onCancel={onCancelNegotiation}
                    />
@@ -421,12 +430,97 @@ const SolutionPanel = ({
                       </div>
                       {/* [MODIFIED] 单条消息滚动容器 - 添加点击事件 */}
                       <div 
-                        className="message-content cursor-pointer hover:bg-orange-100 rounded p-2 transition-colors"
+                        className="message-content cursor-pointer rounded p-2 transition-colors"
                         onClick={() => setInput(message.text)}
                         title="点击填入输入框"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(251,146,60,0.06) 0%, rgba(254,215,170,0.05) 100%)',
+                          border: '1px solid rgba(251,146,60,0.2)',
+                          maxHeight: 'none',
+                          overflowY: 'visible'
+                        }}
                       >
                         <p className="whitespace-pre-wrap text-white select-text">{message.text}</p>
                       </div>
+                      
+                      {/* 追问反馈按钮 */}
+                      <div className="mt-3">
+                        {message.feedbackGiven ? (
+                          <div className={`text-sm px-3 py-1 rounded ${
+                            message.accepted 
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                              : 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+                          }`}>
+                            {message.accepted ? '✓ 已接受追问' : '↻ 已拒绝，重新生成中...'}
+                          </div>
+                        ) : message.negotiating ? (
+                           <NegotiationPanel 
+                             messageId={message.id}
+                             messageType={message.type}
+                             onSendNegotiation={onSendNegotiationRequest}
+                             onCancel={onCancelNegotiation}
+                           />
+                         ) : message.negotiated ? (
+                           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-2">
+                             <div className="text-sm text-blue-800 dark:text-blue-200">
+                               ✓ 已协商修改
+                               <details className="mt-1">
+                                 <summary className="cursor-pointer text-xs text-blue-600 hover:text-blue-800">查看协商详情</summary>
+                                 <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                                   <div><strong>原始追问:</strong> {message.originalText}</div>
+                                   <div className="mt-1"><strong>协商要求:</strong> {message.negotiationRequest}</div>
+                                 </div>
+                               </details>
+                             </div>
+                           </div>
+                        ) : (
+                           <div className="flex space-x-2">
+                             <button
+                               onClick={() => onAcceptSuggestion && onAcceptSuggestion(message.id)}
+                               className="flex-1 px-3 py-2 text-green-700 rounded-lg transition-colors flex items-center justify-center space-x-1 text-sm"
+                               style={{
+                                 background: 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(52,211,153,0.1) 100%)',
+                                 backdropFilter: 'blur(8px) saturate(1.2)',
+                                 WebkitBackdropFilter: 'blur(8px) saturate(1.2)',
+                                 border: '1px solid rgba(16,185,129,0.25)'
+                               }}
+                               title="接受这个追问"
+                             >
+                               <CheckCircle className="w-4 h-4" />
+                               <span>接受追问</span>
+                             </button>
+                             <button
+                               onClick={() => onNegotiateSuggestion && onNegotiateSuggestion(message.id)}
+                               className="flex-1 px-3 py-2 text-blue-700 rounded-lg transition-colors flex items-center justify-center space-x-1 text-sm"
+                               style={{
+                                 background: 'linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(147,197,253,0.1) 100%)',
+                                 backdropFilter: 'blur(8px) saturate(1.2)',
+                                 WebkitBackdropFilter: 'blur(8px) saturate(1.2)',
+                                 border: '1px solid rgba(59,130,246,0.25)'
+                               }}
+                               title="与AI协商修改追问"
+                             >
+                               <MessageCircle className="w-4 h-4" />
+                               <span>协商</span>
+                             </button>
+                             <button
+                               onClick={() => onRejectSuggestion && onRejectSuggestion(message.id)}
+                               className="flex-1 px-3 py-2 text-red-700 rounded-lg transition-colors flex items-center justify-center space-x-1 text-sm"
+                               style={{
+                                 background: 'linear-gradient(135deg, rgba(248,113,113,0.12) 0%, rgba(252,165,165,0.1) 100%)',
+                                 backdropFilter: 'blur(8px) saturate(1.2)',
+                                 WebkitBackdropFilter: 'blur(8px) saturate(1.2)',
+                                 border: '1px solid rgba(248,113,113,0.25)'
+                               }}
+                               title="要求重新生成"
+                             >
+                               <XCircle className="w-4 h-4" />
+                               <span>重新生成</span>
+                             </button>
+                           </div>
+                        )}
+                      </div>
+                      
                       <div className="text-xs text-white mt-1 opacity-80">
                         {new Date(message.timestamp).toLocaleTimeString()}
                       </div>

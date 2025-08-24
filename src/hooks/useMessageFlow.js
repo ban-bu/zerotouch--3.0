@@ -342,7 +342,9 @@ export const useMessageFlow = (currentScenario) => {
       const followUpMessage = {
         type: 'followup',
         text: llmResult.followUpMessage,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        id: `followup_${Date.now()}`,
+        feedbackGiven: false
       }
       addMessage('solution', followUpMessage)
 
@@ -564,14 +566,14 @@ export const useMessageFlow = (currentScenario) => {
     }))
   }, [])
 
-  // 新增：发送协商请求
-  const sendNegotiationRequest = useCallback(async (suggestionId, negotiationText) => {
+  // 新增：发送协商请求（支持建议和追问）
+  const sendNegotiationRequest = useCallback(async (messageId, negotiationText) => {
     if (!negotiationText.trim()) return
 
     try {
-      // 获取原始建议
-      const originalSuggestion = messages.solution.find(msg => msg.id === suggestionId)
-      if (!originalSuggestion) return
+      // 获取原始消息（建议或追问）
+      const originalMessage = messages.solution.find(msg => msg.id === messageId)
+      if (!originalMessage) return
 
       // 构建协商上下文
       const chatHistory = [
@@ -583,38 +585,60 @@ export const useMessageFlow = (currentScenario) => {
           .map(msg => ({ ...msg, panel: 'solution' }))
       ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
 
-      // 生成协商后的建议
-      const llmResult = await processWithLLM({
-        type: 'negotiate_suggestion',
-        content: {
-          originalSuggestion: originalSuggestion.text,
-          negotiationRequest: negotiationText
-        },
-        scenario: currentScenario,
-        chatHistory: chatHistory
-      })
+      // 根据消息类型选择协商类型
+      let llmResult, llmTitle, contentKey
+      if (originalMessage.type === 'suggestion') {
+        // 协商建议
+        llmResult = await processWithLLM({
+          type: 'negotiate_suggestion',
+          content: {
+            originalSuggestion: originalMessage.text,
+            negotiationRequest: negotiationText
+          },
+          scenario: currentScenario,
+          chatHistory: chatHistory
+        })
+        llmTitle = '协商修改建议'
+        contentKey = 'suggestionMessage'
+      } else if (originalMessage.type === 'followup') {
+        // 协商追问
+        llmResult = await processWithLLM({
+          type: 'negotiate_followup',
+          content: {
+            originalFollowUp: originalMessage.text,
+            negotiationRequest: negotiationText
+          },
+          scenario: currentScenario,
+          chatHistory: chatHistory
+        })
+        llmTitle = '协商修改追问'
+        contentKey = 'followUpMessage'
+      } else {
+        console.error('不支持的消息类型:', originalMessage.type)
+        return
+      }
 
       // 添加LLM处理过程到中介面板
       const llmMessage = {
         type: 'processing',
-        title: '协商修改建议',
+        title: llmTitle,
         steps: llmResult.steps,
-        output: llmResult.suggestionMessage,
+        output: llmResult[contentKey],
         timestamp: new Date().toISOString()
       }
       addMessage('llm', llmMessage)
 
-      // 更新原建议为协商后的版本
+      // 更新原消息为协商后的版本
       setMessages(prev => ({
         ...prev,
         solution: prev.solution.map(msg => 
-          msg.id === suggestionId 
+          msg.id === messageId 
             ? { 
                 ...msg, 
-                text: llmResult.suggestionMessage,
+                text: llmResult[contentKey],
                 negotiating: false,
                 negotiated: true,
-                originalText: originalSuggestion.text,
+                originalText: originalMessage.text,
                 negotiationRequest: negotiationText
               }
             : msg
@@ -622,27 +646,35 @@ export const useMessageFlow = (currentScenario) => {
       }))
 
     } catch (error) {
-      console.error('协商建议错误:', error)
+      console.error('协商处理错误:', error)
       // 协商失败，退出协商模式
-      cancelNegotiation(suggestionId)
+      cancelNegotiation(messageId)
     }
   }, [messages.problem, messages.solution, currentScenario, addMessage, cancelNegotiation])
 
-  // 新增：拒绝建议并重新生成
-  const rejectSuggestion = useCallback(async (suggestionId) => {
-    // 标记建议为已拒绝
+  // 新增：拒绝消息并重新生成（支持建议和追问）
+  const rejectSuggestion = useCallback(async (messageId) => {
+    // 获取原始消息以确定类型
+    const originalMessage = messages.solution.find(msg => msg.id === messageId)
+    if (!originalMessage) return
+
+    // 标记消息为已拒绝
     setMessages(prev => ({
       ...prev,
       solution: prev.solution.map(msg => 
-        msg.id === suggestionId 
+        msg.id === messageId 
           ? { ...msg, feedbackGiven: true, accepted: false }
           : msg
       )
     }))
 
-    // 重新生成建议
-    await generateSuggestion()
-  }, [generateSuggestion])
+    // 根据消息类型重新生成
+    if (originalMessage.type === 'suggestion') {
+      await generateSuggestion()
+    } else if (originalMessage.type === 'followup') {
+      await generateFollowUp()
+    }
+  }, [messages.solution, generateSuggestion, generateFollowUp])
 
   // 新增：清空所有状态
   const clearAllStates = useCallback(() => {
